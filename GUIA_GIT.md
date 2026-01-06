@@ -2,6 +2,15 @@
 
 O código foi commitado localmente, mas precisa ser enviado (push) para o GitHub.
 
+## 🚀 Solução Rápida
+
+Execute o script de configuração:
+```powershell
+.\configurar-git.ps1
+```
+
+O script irá guiá-lo através do processo de autenticação.
+
 ## ✅ Status Atual
 
 - ✅ Repositório Git inicializado
