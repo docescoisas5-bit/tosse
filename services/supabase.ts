@@ -88,11 +88,11 @@ export class SupabaseService {
       } else {
         // Para URLs web, usa fetch
         console.log('🌐 Lendo arquivo de URL...');
-        const response = await fetch(audioUri);
+      const response = await fetch(audioUri);
         if (!response.ok) {
           throw new Error(`Erro ao buscar áudio: ${response.status}`);
         }
-        const blob = await response.blob();
+      const blob = await response.blob();
         fileData = blob;
         console.log('✅ Arquivo baixado, tamanho:', blob.size, 'bytes');
       }
@@ -136,10 +136,10 @@ export class SupabaseService {
       if (urlError) {
         console.warn('⚠️ Erro ao criar URL assinada, usando URL pública:', urlError);
         // Fallback para URL pública
-        const { data: urlData } = supabase.storage
-          .from('cough-recordings')
-          .getPublicUrl(fileName);
-        return urlData.publicUrl;
+      const { data: urlData } = supabase.storage
+        .from('cough-recordings')
+        .getPublicUrl(fileName);
+      return urlData.publicUrl;
       }
 
       console.log('✅ URL assinada gerada');

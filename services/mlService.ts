@@ -557,8 +557,8 @@ export class MLService {
               
               // Se chegou aqui, o modelo foi carregado com sucesso
               console.log('✅ Modelo carregado com sucesso (IOHandler customizado)');
-              console.log('📊 Input shape:', this.model.inputs[0].shape);
-              console.log('📊 Output shape:', this.model.outputs[0].shape);
+          console.log('📊 Input shape:', this.model.inputs[0].shape);
+          console.log('📊 Output shape:', this.model.outputs[0].shape);
               
               // Verifica os nomes das variáveis do modelo
               try {
@@ -746,7 +746,7 @@ export class MLService {
       
       const prediction = this.model!.predict(input) as tf.Tensor;
       const probabilities = await prediction.array() as number[][];
-      
+
       const [normal, bronchitis, pneumonia] = probabilities[0];
       
       // LOGS DETALHADOS PARA DEBUG

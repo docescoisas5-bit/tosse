@@ -372,7 +372,7 @@ export class AudioPreprocessor {
     // OTIMIZAÇÃO: Usa tf.stack() em vez de loop com arraySync()
     // Isso é muito mais rápido porque mantém tudo no TensorFlow.js
     const frameTensors: tf.Tensor[] = [];
-    
+
     for (let i = 0; i < numFrames; i++) {
       const start = i * this.FRAME_HOP;
       const end = Math.min(start + this.FRAME_LENGTH, signalLength);
