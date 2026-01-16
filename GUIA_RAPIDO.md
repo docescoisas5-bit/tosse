@@ -25,9 +25,14 @@ npm run android             # Abre no Android
 npm run ios                  # Abre no iOS
 npm run web                  # Abre no navegador
 
-# Build
-npx expo build:android      # Build para Android
-npx expo build:ios           # Build para iOS
+# EAS Build (Recomendado)
+eas build:configure         # Configura EAS Build
+eas build --platform android # Build para Android
+eas build --platform ios    # Build para iOS
+eas build --platform all    # Build para ambas plataformas
+
+# EAS Update (OTA)
+eas update --branch production # Publicar atualização OTA
 ```
 
 ## 🔑 Variáveis de Ambiente
@@ -124,6 +129,11 @@ await signOut();
 ### Erro: "Permissão negada"
 - Android: Configurações > Apps > Expo Go > Permissões
 - iOS: Configurações > Privacidade > Microfone
+
+### Erro: "Failed to read /eas.json"
+- O arquivo `eas.json` já foi criado no projeto
+- Se ainda aparecer o erro, execute: `eas build:configure`
+- Ou instale EAS CLI: `npm install -g eas-cli`
 
 ## 📚 Documentação Completa
 

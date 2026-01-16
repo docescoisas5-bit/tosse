@@ -987,27 +987,83 @@ describe('MLService', () => {
 
 ## 11. Deploy e Distribuição
 
-### 11.1 Build para Produção
+### 11.1 Configuração do EAS Build
 
-#### Android (APK)
+O projeto utiliza **EAS Build** (Expo Application Services) para builds de produção. O arquivo `eas.json` contém as configurações necessárias.
+
+#### Instalar EAS CLI
 ```bash
-# Build APK
-npx expo build:android -t apk
-
-# Build AAB (Google Play)
-npx expo build:android -t app-bundle
+npm install -g eas-cli
 ```
 
-#### iOS (IPA)
+#### Login no EAS
 ```bash
-# Requer conta Apple Developer
-npx expo build:ios
+eas login
 ```
 
-### 11.2 Configuração de Variáveis de Ambiente
+#### Configurar Projeto
+```bash
+eas build:configure
+```
 
-Para produção, configure as variáveis no `app.json`:
+Isso criará/atualizará o arquivo `eas.json` com as configurações apropriadas.
 
+### 11.2 Build para Produção
+
+#### Android
+
+##### Build APK (Preview/Teste)
+```bash
+# Build APK para testes internos
+eas build --platform android --profile preview
+```
+
+##### Build AAB (Google Play Store)
+```bash
+# Build AAB para produção
+eas build --platform android --profile production
+```
+
+#### iOS
+
+##### Build para Simulador (Preview)
+```bash
+# Build para simulador iOS
+eas build --platform ios --profile preview
+```
+
+##### Build IPA (App Store)
+```bash
+# Build IPA para produção (requer conta Apple Developer)
+eas build --platform ios --profile production
+```
+
+#### Build para Ambas as Plataformas
+```bash
+# Build para Android e iOS simultaneamente
+eas build --platform all --profile production
+```
+
+### 11.3 Configuração de Variáveis de Ambiente
+
+Para produção, configure as variáveis de duas formas:
+
+#### Opção 1: Arquivo `eas.json` (Recomendado)
+```json
+{
+  "build": {
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://seu-projeto.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sua_chave_aqui",
+        "EXPO_PUBLIC_MODEL_URL": "https://seu-projeto.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json"
+      }
+    }
+  }
+}
+```
+
+#### Opção 2: Arquivo `app.json`
 ```json
 {
   "expo": {
@@ -1020,7 +1076,31 @@ Para produção, configure as variáveis no `app.json`:
 }
 ```
 
-### 11.3 Distribuição
+**Nota**: Variáveis no `eas.json` têm prioridade sobre `app.json` durante builds do EAS.
+
+### 11.4 Perfis de Build no EAS
+
+O arquivo `eas.json` define três perfis de build:
+
+#### `development`
+- Build com development client
+- Distribuição interna
+- Debug habilitado
+- Usado para desenvolvimento e testes
+
+#### `preview`
+- Build para testes internos
+- Android: APK
+- iOS: Simulador
+- Distribuição interna
+
+#### `production`
+- Build para lojas de aplicativos
+- Android: AAB (Google Play)
+- iOS: IPA (App Store)
+- Otimizado para produção
+
+### 11.5 Distribuição
 
 #### Google Play Store
 1. Crie conta de desenvolvedor
@@ -1034,19 +1114,33 @@ Para produção, configure as variáveis no `app.json`:
 3. Faça upload via Xcode ou Transporter
 4. Submeta para revisão
 
-### 11.4 Atualizações OTA (Over-The-Air)
+### 11.6 Atualizações OTA (Over-The-Air)
 
-Com Expo, é possível atualizar o app sem reenviar para as lojas:
+Com EAS Update, é possível atualizar o app sem reenviar para as lojas:
 
+#### Publicar Atualização
 ```bash
-# Publicar atualização
-npx expo publish
+# Publicar atualização para produção
+eas update --branch production --message "Correção de bugs"
+
+# Publicar atualização para preview
+eas update --branch preview --message "Nova feature"
+```
+
+#### Configurar Canais de Atualização
+```bash
+# Criar canal de atualização
+eas channel:create production
+
+# Publicar no canal
+eas update --channel production
 ```
 
 **Limitações:**
 - Não pode alterar código nativo
 - Não pode alterar dependências nativas
 - Apenas atualizações de JavaScript
+- Requer EAS Update configurado no projeto
 
 ---
 
