@@ -29,7 +29,9 @@
       "permissions": [
         "RECORD_AUDIO",
         "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE"
+        "READ_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -44,10 +46,15 @@
       ]
     ],
     "scheme": "coughanalysis",
-    "associatedDomains": ["applinks:tosse.app"],
+    "associatedDomains": [
+      "applinks:tosse.app"
+    ],
     "extra": {
-      "modelUrl": "https://gorslmmmivhbjrczsoie.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json"
-    }
+      "modelUrl": "https://gorslmmmivhbjrczsoie.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json",
+      "eas": {
+        "projectId": "942daa14-bc02-4f54-9a7b-354ccfdbdb2e"
+      }
+    },
+    "owner": "themaura"
   }
 }
-
