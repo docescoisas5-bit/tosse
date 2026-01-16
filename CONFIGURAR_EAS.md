@@ -60,7 +60,24 @@ eas project:info
 eas secret:list
 ```
 
-### 5. Fazer Primeiro Build
+### 5. Configurar Credenciais (OBRIGATÓRIO para Primeiro Build)
+
+**⚠️ IMPORTANTE**: Você precisa configurar as credenciais (keystore Android) antes do primeiro build:
+
+```bash
+# Configurar credenciais Android
+eas credentials --platform android
+```
+
+Escolha:
+1. **"Set up a new keystore"** ou **"Generate a new keystore"**
+2. **"Save credentials to EAS servers"** (não salve localmente)
+
+Isso permite que builds em CI/CD funcionem em modo não-interativo.
+
+**📖 Guia Completo**: Consulte [CONFIGURAR_CREDENCIAIS.md](./CONFIGURAR_CREDENCIAIS.md) para instruções detalhadas.
+
+### 6. Fazer Primeiro Build
 
 #### Android (APK para testes)
 ```bash

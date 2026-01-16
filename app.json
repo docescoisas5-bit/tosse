@@ -25,7 +25,6 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.coughanalysis.app",
-      "versionCode": 1,
       "permissions": [
         "RECORD_AUDIO",
         "WRITE_EXTERNAL_STORAGE",

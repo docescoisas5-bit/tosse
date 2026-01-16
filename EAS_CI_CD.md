@@ -34,7 +34,38 @@ Após executar `eas init`, verifique se foi criado:
 
 **⚠️ IMPORTANTE**: O arquivo `.easrc` deve ser **commitado no repositório** para que o CI/CD funcione.
 
-### Passo 3: Configurar Secrets no EAS
+### Passo 3: Configurar Credenciais Android/iOS
+
+**⚠️ IMPORTANTE**: As credenciais (keystore Android e certificados iOS) devem ser geradas antes do primeiro build em CI/CD.
+
+#### Android (Keystore)
+
+Gere o keystore localmente:
+
+```bash
+# Gerar credenciais Android (executa interativamente e salva no EAS)
+eas credentials
+```
+
+Ou configure manualmente:
+
+```bash
+# Configurar credenciais Android
+eas credentials --platform android
+```
+
+Escolha a opção para gerar um novo keystore e salvá-lo no EAS (recomendado).
+
+#### iOS (Certificados)
+
+Para iOS, você também precisa configurar:
+
+```bash
+# Configurar credenciais iOS
+eas credentials --platform ios
+```
+
+### Passo 4: Configurar Secrets no EAS
 
 Configure os secrets no EAS (não no CI/CD):
 
@@ -130,6 +161,21 @@ eas secret:list
 
 ## ⚠️ Troubleshooting
 
+### Erro: "Generating a new Keystore is not supported in --non-interactive mode"
+
+**Causa**: As credenciais Android não foram configuradas no EAS.
+
+**Solução**:
+1. Execute localmente: `eas credentials --platform android`
+2. Escolha a opção para gerar um novo keystore
+3. Salve no EAS (não localmente)
+4. Agora o CI/CD poderá usar as credenciais remotas
+
+**Comando rápido**:
+```bash
+eas credentials --platform android
+```
+
 ### Erro: "EAS project not configured" no CI/CD
 
 **Causa**: O projeto não foi inicializado localmente.
@@ -178,10 +224,13 @@ eas project:info
 
 - [ ] Executou `eas init` localmente
 - [ ] Arquivo `.easrc` foi commitado (ou `projectId` no `app.json`)
+- [ ] **Credenciais Android configuradas** (`eas credentials --platform android`)
+- [ ] **Credenciais iOS configuradas** (se necessário, `eas credentials --platform ios`)
 - [ ] Secrets configurados no EAS (`eas secret:create`)
 - [ ] Token do Expo configurado como secret no CI/CD
 - [ ] Workflow CI/CD usa flag `--non-interactive`
 - [ ] Workflow CI/CD tem `EXPO_TOKEN` configurado
+- [ ] `versionCode` removido do `app.json` (se usando versionamento remoto)
 
 ## 🔗 Links Úteis
 
