@@ -29,6 +29,9 @@ export interface UserProfile {
   id: string;
   email: string;
   role: 'user' | 'admin';
+  name?: string;
+  photo_url?: string;
+  address?: string;
   created_at: string;
   updated_at: string;
 }

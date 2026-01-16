@@ -227,6 +227,135 @@ export class SupabaseService {
       throw error;
     }
   }
+
+  /**
+   * Atualiza o perfil do usuário
+   */
+  async updateProfile(
+    userId: string,
+    updates: {
+      name?: string;
+      photo_url?: string;
+      address?: string;
+    }
+  ): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Atualiza a senha do usuário
+   */
+  async updatePassword(newPassword: string): Promise<void> {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar senha:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Faz upload de foto de perfil
+   */
+  async uploadProfilePhoto(userId: string, photoUri: string): Promise<string> {
+    try {
+      console.log('📤 Iniciando upload de foto de perfil:', photoUri);
+      
+      let fileData: Blob | Uint8Array;
+      
+      // Verifica se é um arquivo local (file://) ou URL web
+      if (photoUri.startsWith('file://')) {
+        // Para arquivos locais, usa expo-file-system
+        console.log('📁 Lendo arquivo local...');
+        
+        // Lê o arquivo como base64
+        const base64 = await FileSystem.readAsStringAsync(photoUri, {
+          encoding: 'base64' as any,
+        });
+        
+        // Converte base64 para Uint8Array
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        fileData = bytes;
+        console.log('✅ Arquivo lido, tamanho:', bytes.length, 'bytes');
+      } else {
+        // Para URLs web, usa fetch
+        console.log('🌐 Lendo arquivo de URL...');
+        const response = await fetch(photoUri);
+        if (!response.ok) {
+          throw new Error(`Erro ao buscar foto: ${response.status}`);
+        }
+        const blob = await response.blob();
+        fileData = blob;
+        console.log('✅ Arquivo baixado, tamanho:', blob.size, 'bytes');
+      }
+      
+      // Gera nome único para o arquivo
+      const timestamp = Date.now();
+      const fileName = `profile-photos/${userId}/${timestamp}.jpg`;
+      console.log('📝 Nome do arquivo:', fileName);
+      
+      // Faz upload
+      const { data, error } = await supabase.storage
+        .from('cough-recordings') // Usa o mesmo bucket ou cria um específico
+        .upload(fileName, fileData, {
+          contentType: 'image/jpeg',
+          upsert: false,
+        });
+
+      if (error) {
+        console.error('❌ Erro no upload:', error);
+        throw error;
+      }
+
+      console.log('✅ Upload concluído:', data.path);
+
+      // Obtém URL assinada
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from('cough-recordings')
+        .createSignedUrl(fileName, 31536000); // 1 ano de validade
+
+      if (urlError) {
+        console.warn('⚠️ Erro ao criar URL assinada, usando URL pública:', urlError);
+        // Fallback para URL pública
+        const { data: urlData } = supabase.storage
+          .from('cough-recordings')
+          .getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
+
+      console.log('✅ URL assinada gerada');
+      return signedUrlData.signedUrl;
+    } catch (error) {
+      console.error('❌ Erro ao fazer upload da foto:', error);
+      throw error;
+    }
+  }
 }
 
 export const supabaseService = new SupabaseService();

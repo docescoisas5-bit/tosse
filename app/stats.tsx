@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { userStatsService } from '../services/userStatsService';
 import { AnimatedCard } from '../components/AnimatedCard';
 import { AnimatedButton } from '../components/AnimatedButton';
+import { BottomTabNavigator } from '../components/BottomTabNavigator';
 
 export default function StatsScreen() {
   const { user } = useAuth();
@@ -81,6 +82,7 @@ export default function StatsScreen() {
             style={styles.emptyButton}
           />
         </ScrollView>
+        <BottomTabNavigator />
       </LinearGradient>
     );
   }
@@ -167,6 +169,7 @@ export default function StatsScreen() {
           style={styles.actionButton}
         />
       </ScrollView>
+      <BottomTabNavigator />
     </LinearGradient>
   );
 }
@@ -181,6 +184,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingTop: 60,
+    paddingBottom: 100, // Espaço para a barra de navegação inferior
   },
   loadingContainer: {
     flex: 1,

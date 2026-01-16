@@ -12,6 +12,7 @@ import {
 import { router } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { supabaseService } from '../services/supabase';
+import { BottomTabNavigator } from '../components/BottomTabNavigator';
 import { Analysis, DiagnosisClass } from '../types';
 
 export default function HistoryScreen() {
@@ -102,13 +103,14 @@ export default function HistoryScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View style={styles.wrapper}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
       {analyses.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Nenhuma análise encontrada</Text>
@@ -198,17 +200,23 @@ export default function HistoryScreen() {
           })}
         </>
       )}
-    </ScrollView>
+      </ScrollView>
+      <BottomTabNavigator />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
   content: {
     padding: 16,
+    paddingBottom: 100, // Espaço para a barra de navegação inferior
   },
   loadingContainer: {
     flex: 1,

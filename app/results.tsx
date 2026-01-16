@@ -173,16 +173,16 @@ export default function ResultsScreen() {
         <View style={[styles.resultHeader, { borderLeftColor: classColor }]}>
           <Text style={styles.resultIcon}>{getIcon(predictedClass)}</Text>
           <View style={styles.resultContent}>
-            <Text style={styles.resultLabel}>Resultado Previsto</Text>
+        <Text style={styles.resultLabel}>Resultado Previsto</Text>
             <Text style={[styles.resultValue, { color: classColor }]}>
-              {getClassLabel(predictedClass)}
-            </Text>
+          {getClassLabel(predictedClass)}
+        </Text>
             <View style={styles.confidenceContainer}>
               <View style={[styles.confidenceBar, { backgroundColor: classColor }]}>
-                <Text style={styles.confidenceText}>
+        <Text style={styles.confidenceText}>
                   {confidence}% de confiança
-                </Text>
-              </View>
+        </Text>
+      </View>
             </View>
           </View>
         </View>

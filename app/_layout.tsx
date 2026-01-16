@@ -70,7 +70,7 @@ export default function RootLayout() {
             name="home" 
             options={{ 
               title: 'Análise de Tosse',
-              headerShown: true,
+              headerShown: false,
             }} 
           />
           <Stack.Screen 
@@ -84,7 +84,7 @@ export default function RootLayout() {
             name="history" 
             options={{ 
               title: 'Histórico',
-              headerShown: true,
+              headerShown: false,
             }} 
           />
           <Stack.Screen 
@@ -98,7 +98,7 @@ export default function RootLayout() {
             name="stats" 
             options={{ 
               title: 'Estatísticas',
-              headerShown: true,
+              headerShown: false,
             }} 
           />
           <Stack.Screen 
@@ -109,10 +109,17 @@ export default function RootLayout() {
             }} 
           />
           <Stack.Screen 
+            name="about" 
+            options={{ 
+              title: 'Sobre',
+              headerShown: true,
+            }} 
+          />
+          <Stack.Screen 
             name="profile" 
             options={{ 
               title: 'Meu Perfil',
-              headerShown: true,
+              headerShown: false,
             }} 
           />
         </Stack>

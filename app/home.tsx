@@ -8,15 +8,13 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
-  Linking,
-  Share,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { AudioRecorder } from '../components/AudioRecorder';
 import { AnimatedCard } from '../components/AnimatedCard';
-import { AnimatedButton } from '../components/AnimatedButton';
+import { BottomTabNavigator } from '../components/BottomTabNavigator';
 import { mlService } from '../services/mlService';
 import { supabaseService } from '../services/supabase';
 import { userStatsService } from '../services/userStatsService';
@@ -25,7 +23,7 @@ import { AudioRecording, DiagnosisResult } from '../types';
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [userStats, setUserStats] = useState<any>(null);
@@ -116,50 +114,6 @@ export default function HomeScreen() {
     }
   };
 
-  const handleViewHistory = () => {
-    router.push('/history');
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.replace('/(auth)/login');
-    } catch (error: any) {
-      Alert.alert('Erro', 'Não foi possível fazer logout');
-    }
-  };
-
-  const handleViewStats = () => {
-    router.push('/stats');
-  };
-
-  const handleViewTutorial = () => {
-    router.push('/tutorial');
-  };
-
-  const handleShareApp = async () => {
-    try {
-      await Share.share({
-        message: 'Baixe o app de Análise de Tosse - Use IA para auxiliar na identificação de problemas respiratórios!',
-        title: 'Análise de Tosse',
-      });
-    } catch (error: any) {
-      console.error('Erro ao compartilhar:', error);
-    }
-  };
-
-  const handleViewInfo = () => {
-    Alert.alert(
-      'Sobre o Modelo',
-      'Este aplicativo utiliza inteligência artificial treinada com milhares de gravações de tosse para auxiliar na identificação de possíveis sinais de pneumonia ou bronquite.\n\nO modelo analisa características acústicas do som da tosse usando técnicas avançadas de processamento de sinal (MFCC, STFT) e deep learning.\n\n⚠️ Lembre-se: Este é um auxiliar e não substitui o diagnóstico médico profissional.',
-      [{ text: 'Entendi', style: 'default' }]
-    );
-  };
-
-  const handleViewProfile = () => {
-    router.push('/profile');
-  };
-
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -183,7 +137,7 @@ export default function HomeScreen() {
             ]}
           >
             <Text style={styles.welcomeText}>Olá! 👋</Text>
-            <Text style={styles.emailText}>{user?.email}</Text>
+        <Text style={styles.emailText}>{user?.email}</Text>
           </Animated.View>
 
           <AnimatedCard delay={100}>
@@ -195,38 +149,38 @@ export default function HomeScreen() {
                   <Text style={styles.statusText}>Pronto</Text>
                 </View>
               )}
-            </View>
-            <Text style={styles.cardDescription}>
+      </View>
+        <Text style={styles.cardDescription}>
               Grave o som da tosse para análise inteligente. O sistema utiliza
               inteligência artificial para auxiliar na identificação de possíveis
               sinais de pneumonia ou bronquite.
-            </Text>
+        </Text>
 
-            {!modelLoaded && (
-              <View style={styles.loadingContainer}>
+        {!modelLoaded && (
+          <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color="#667eea" />
-                <Text style={styles.loadingText}>Carregando modelo...</Text>
-              </View>
-            )}
+            <Text style={styles.loadingText}>Carregando modelo...</Text>
+          </View>
+        )}
 
-            {isAnalyzing ? (
-              <View style={styles.analyzingContainer}>
+        {isAnalyzing ? (
+          <View style={styles.analyzingContainer}>
                 <ActivityIndicator size="large" color="#667eea" />
-                <Text style={styles.analyzingText}>
-                  Analisando gravação...
-                </Text>
-                <Text style={styles.analyzingSubtext}>
+            <Text style={styles.analyzingText}>
+              Analisando gravação...
+            </Text>
+            <Text style={styles.analyzingSubtext}>
                   Processando com IA, aguarde alguns segundos
-                </Text>
-              </View>
-            ) : (
-              <AudioRecorder
-                onRecordingComplete={handleRecordingComplete}
-                onError={(error) => {
-                  Alert.alert('Erro', error.message || 'Erro ao gravar áudio');
-                }}
-              />
-            )}
+            </Text>
+          </View>
+        ) : (
+          <AudioRecorder
+            onRecordingComplete={handleRecordingComplete}
+            onError={(error) => {
+              Alert.alert('Erro', error.message || 'Erro ao gravar áudio');
+            }}
+          />
+        )}
           </AnimatedCard>
 
           {/* Estatísticas Rápidas */}
@@ -248,7 +202,7 @@ export default function HomeScreen() {
                   <Text style={styles.statValue}>{userStats.mostCommonDiagnosis}</Text>
                   <Text style={styles.statLabel}>Mais Comum</Text>
                 </View>
-              </View>
+      </View>
             </AnimatedCard>
           )}
 
@@ -264,74 +218,25 @@ export default function HomeScreen() {
           </AnimatedCard>
 
           <AnimatedCard delay={300} style={styles.warningCard}>
-            <Text style={styles.warningTitle}>⚠️ Aviso Importante</Text>
-            <Text style={styles.warningText}>
-              Esta aplicação é uma ferramenta auxiliar e não substitui o
-              diagnóstico médico profissional. Sempre consulte um médico para
-              avaliação adequada.
-            </Text>
+        <Text style={styles.warningTitle}>⚠️ Aviso Importante</Text>
+        <Text style={styles.warningText}>
+          Esta aplicação é uma ferramenta auxiliar e não substitui o
+          diagnóstico médico profissional. Sempre consulte um médico para
+          avaliação adequada.
+        </Text>
           </AnimatedCard>
-
-          {/* Grid de Ações */}
-          <View style={styles.actionsGrid}>
-            <AnimatedButton
-              title="📊 Histórico"
-              onPress={handleViewHistory}
-              variant="secondary"
-              style={styles.gridButton}
-            />
-            <AnimatedButton
-              title="📈 Estatísticas"
-              onPress={handleViewStats}
-              variant="secondary"
-              style={styles.gridButton}
-            />
-            <AnimatedButton
-              title="👤 Perfil"
-              onPress={handleViewProfile}
-              variant="secondary"
-              style={styles.gridButton}
-            />
-            <AnimatedButton
-              title="❓ Ajuda"
-              onPress={handleViewTutorial}
-              variant="secondary"
-              style={styles.gridButton}
-            />
-            <AnimatedButton
-              title="ℹ️ Sobre"
-              onPress={handleViewInfo}
-              variant="secondary"
-              style={styles.gridButton}
-            />
-            <AnimatedButton
-              title="📤 Compartilhar"
-              onPress={handleShareApp}
-              variant="secondary"
-              style={styles.gridButton}
-            />
-          </View>
-
-          {/* Botões Principais */}
-          <View style={styles.actions}>
-            {isAdmin && (
-              <AnimatedButton
-                title="⚙️ Painel Admin"
-                onPress={() => router.push('/admin')}
-                variant="warning"
-                style={styles.actionButton}
-              />
-            )}
-
-            <AnimatedButton
-              title="🚪 Sair"
-              onPress={handleSignOut}
-              variant="danger"
-              style={styles.actionButton}
-            />
-          </View>
-        </ScrollView>
+    </ScrollView>
       </LinearGradient>
+      <BottomTabNavigator />
+      {isAdmin && (
+        <View style={styles.adminFloating}>
+          <View style={styles.adminFloatingInner}>
+            <Text style={styles.adminFloatingText} onPress={() => router.push('/admin')}>
+              ⚙️ Painel Admin
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -349,6 +254,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingTop: 60,
+    paddingBottom: 100, // Espaço para a barra de navegação inferior
   },
   header: {
     marginBottom: 32,
@@ -492,22 +398,24 @@ const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 22,
   },
-  actionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 16,
+  adminFloating: {
+    position: 'absolute',
+    right: 16,
+    bottom: 110,
   },
-  gridButton: {
-    flex: 1,
-    minWidth: '30%',
-    marginBottom: 8,
+  adminFloatingInner: {
+    backgroundColor: 'rgba(255, 193, 7, 0.95)',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  actions: {
-    gap: 12,
-    marginBottom: 32,
-  },
-  actionButton: {
-    marginBottom: 8,
+  adminFloatingText: {
+    fontWeight: '800',
+    color: '#2c2c2c',
   },
 });

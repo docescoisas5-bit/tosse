@@ -239,19 +239,19 @@ export function AudioRecorder({ onRecordingComplete, onError }: AudioRecorderPro
             },
           ]}
         >
-          <TouchableOpacity
-            style={[
-              styles.recordButton,
-              isRecording && styles.recordButtonActive,
-              isProcessing && styles.recordButtonDisabled,
-            ]}
-            onPress={isRecording ? stopRecording : startRecording}
-            disabled={isProcessing}
+      <TouchableOpacity
+        style={[
+          styles.recordButton,
+          isRecording && styles.recordButtonActive,
+          isProcessing && styles.recordButtonDisabled,
+        ]}
+        onPress={isRecording ? stopRecording : startRecording}
+        disabled={isProcessing}
             activeOpacity={0.8}
-          >
-            {isProcessing ? (
+      >
+        {isProcessing ? (
               <ActivityIndicator color="#fff" size="large" />
-            ) : (
+        ) : (
               <View style={styles.buttonContent}>
                 {isRecording ? (
                   <View style={styles.stopIcon} />
@@ -259,8 +259,8 @@ export function AudioRecorder({ onRecordingComplete, onError }: AudioRecorderPro
                   <View style={styles.playIcon} />
                 )}
               </View>
-            )}
-          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
         </Animated.View>
       </View>
 

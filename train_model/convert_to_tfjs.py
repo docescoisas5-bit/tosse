@@ -9,7 +9,7 @@ except ImportError:
     import subprocess
     import sys
     subprocess.check_call([sys.executable, "-m", "pip", "install", "tensorflowjs", "--quiet"])
-    import tensorflowjs as tfjs
+import tensorflowjs as tfjs
 
 from pathlib import Path
 import json
