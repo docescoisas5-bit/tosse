@@ -1048,20 +1048,15 @@ eas build --platform all --profile production
 
 Para produção, configure as variáveis de duas formas:
 
-#### Opção 1: Arquivo `eas.json` (Recomendado)
-```json
-{
-  "build": {
-    "production": {
-      "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "https://seu-projeto.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sua_chave_aqui",
-        "EXPO_PUBLIC_MODEL_URL": "https://seu-projeto.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json"
-      }
-    }
-  }
-}
+#### Opção 1: Secrets do EAS (Recomendado)
+```bash
+# Configurar secrets do EAS (mais seguro)
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value "https://seu-projeto.supabase.co"
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "sua_chave_aqui"
+eas secret:create --scope project --name EXPO_PUBLIC_MODEL_URL --value "https://seu-projeto.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json"
 ```
+
+**Nota**: Secrets do EAS são mais seguros e não aparecem no código. Se preferir usar `eas.json`, adicione as variáveis apenas quando tiver valores válidos (não deixe vazias).
 
 #### Opção 2: Arquivo `app.json`
 ```json
@@ -1076,7 +1071,10 @@ Para produção, configure as variáveis de duas formas:
 }
 ```
 
-**Nota**: Variáveis no `eas.json` têm prioridade sobre `app.json` durante builds do EAS.
+**Nota**: 
+- Secrets do EAS têm prioridade sobre `app.json` durante builds
+- Não deixe variáveis vazias no `eas.json` (causa erro de validação)
+- Use `eas secret:create` para variáveis sensíveis
 
 ### 11.4 Perfis de Build no EAS
 

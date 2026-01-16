@@ -43,6 +43,16 @@ eas update --branch production # Publicar atualização OTA
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Chave anônima do Supabase | ✅ Sim |
 | `EXPO_PUBLIC_MODEL_URL` | URL do modelo ML | ❌ Não (usa placeholder) |
 
+### Configurar para EAS Build
+
+```bash
+# Usar secrets do EAS (recomendado)
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value "https://seu-projeto.supabase.co"
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "sua_chave_aqui"
+```
+
+Ou configure no arquivo `.env` para desenvolvimento local.
+
 ## 📂 Estrutura de Arquivos Principais
 
 ```
