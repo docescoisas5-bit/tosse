@@ -39,11 +39,18 @@ export default function LoginScreen() {
   };
 
   // Tenta carregar a imagem de fundo
+  // Nota: Arquivo renomeado para evitar problemas no build Android
   let backgroundImage;
   try {
-    backgroundImage = require('../../assets/images/respiratory-background.png');
+    // Tenta carregar com nome sem hífen primeiro (recomendado)
+    backgroundImage = require('../../assets/images/respiratory_background.png');
   } catch (e) {
-    backgroundImage = null;
+    try {
+      // Fallback para nome com hífen (pode causar problemas no Android)
+      backgroundImage = require('../../assets/images/respiratory-background.png');
+    } catch (e2) {
+      backgroundImage = null;
+    }
   }
 
   return (
