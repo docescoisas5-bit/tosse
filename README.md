@@ -2,6 +2,12 @@
 
 Aplicação móvel desenvolvida com React Native e Expo para análise de sons de tosse e auxílio na identificação de pneumonia e bronquite, conforme especificação do Projeto Prático 1 - Engenharia do Conhecimento 2025/2026.
 
+## 📚 Documentação
+
+- **[📖 Documentação Completa](./DOCUMENTACAO_COMPLETA.md)** - Documentação técnica completa com todas as propriedades de engenharia de software
+- **[🚀 Guia Rápido](./GUIA_RAPIDO.md)** - Guia rápido de referência para desenvolvedores
+- **[🔐 Configurar Reset de Senha](./CONFIGURAR_RESET_SENHA.md)** - Guia de configuração de redefinição de senha
+
 ## 🎯 Funcionalidades
 
 - ✅ **Autenticação de Usuários**: Login e registro com Supabase Auth

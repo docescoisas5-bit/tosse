@@ -99,6 +99,13 @@ export default function LoginScreen() {
                   )}
                 </TouchableOpacity>
 
+                <TouchableOpacity
+                  style={styles.forgotPasswordButton}
+                  onPress={() => router.push('/(auth)/forgot-password')}
+                >
+                  <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
+                </TouchableOpacity>
+
                 <View style={styles.linkContainer}>
                   <Text style={styles.linkText}>Não tem uma conta? </Text>
                   <Link href="/(auth)/register" asChild>
@@ -152,6 +159,13 @@ export default function LoginScreen() {
                 ) : (
                   <Text style={styles.buttonText}>Entrar</Text>
                 )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.forgotPasswordButton}
+                onPress={() => router.push('/(auth)/forgot-password')}
+              >
+                <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
               </TouchableOpacity>
 
               <View style={styles.linkContainer}>
@@ -239,6 +253,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  forgotPasswordButton: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  forgotPasswordText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 14,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   linkContainer: {
     flexDirection: 'row',

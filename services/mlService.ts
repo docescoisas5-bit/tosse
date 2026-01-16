@@ -14,6 +14,8 @@ export class MLService {
   private model: tf.LayersModel | null = null;
   private modelLoaded: boolean = false;
   private modelUrl: string | null = null;
+  private scalerMean: number[] | null = null;
+  private scalerScale: number[] | null = null;
 
   /**
    * Obtém a URL do modelo das variáveis de ambiente ou usa padrão
@@ -123,6 +125,9 @@ export class MLService {
         console.warn('⚠️ URL não encontrada nas variáveis, usando fallback hardcoded');
         console.log('   URL fallback:', finalUrl);
       }
+
+      // Carrega parâmetros do scaler (StandardScaler)
+      await this.loadScalerParams(finalUrl);
 
       if (finalUrl) {
         console.log('📥 Carregando modelo de:', finalUrl);
@@ -654,6 +659,74 @@ export class MLService {
   }
 
   /**
+   * Carrega parâmetros do StandardScaler do model_info.json
+   * O model_info.json deve estar na mesma pasta do model.json no Supabase Storage
+   */
+  private async loadScalerParams(modelUrl: string): Promise<void> {
+    try {
+      // Tenta carregar model_info.json da mesma pasta do modelo
+      const modelBaseUrl = modelUrl.substring(0, modelUrl.lastIndexOf('/'));
+      const modelInfoUrl = `${modelBaseUrl}/model_info.json`;
+      
+      console.log('📥 Carregando parâmetros do scaler de:', modelInfoUrl);
+      
+      const response = await fetch(modelInfoUrl);
+      if (!response.ok) {
+        console.warn('⚠️ Não foi possível carregar model_info.json, usando valores padrão');
+        console.warn('   Isso pode afetar a precisão das predições');
+        return;
+      }
+      
+      const modelInfo = await response.json();
+      
+      if (modelInfo.scaler && modelInfo.scaler.type === 'StandardScaler') {
+        this.scalerMean = modelInfo.scaler.mean;
+        this.scalerScale = modelInfo.scaler.scale;
+        
+        console.log('✅ Parâmetros do StandardScaler carregados:');
+        console.log(`   Mean: ${this.scalerMean.length} valores`);
+        console.log(`   Scale: ${this.scalerScale.length} valores`);
+        console.log(`   Primeiros valores mean: [${this.scalerMean.slice(0, 3).join(', ')}, ...]`);
+        console.log(`   Primeiros valores scale: [${this.scalerScale.slice(0, 3).join(', ')}, ...]`);
+      } else {
+        console.warn('⚠️ model_info.json não contém parâmetros do scaler');
+      }
+    } catch (error) {
+      console.warn('⚠️ Erro ao carregar parâmetros do scaler:', error);
+      console.warn('   Usando normalização padrão (pode afetar precisão)');
+    }
+  }
+
+  /**
+   * Aplica normalização StandardScaler (z-score) aos dados
+   * Fórmula: (x - mean) / scale
+   */
+  private applyStandardScaler(values: number[]): number[] {
+    if (!this.scalerMean || !this.scalerScale) {
+      console.warn('⚠️ Parâmetros do scaler não disponíveis, retornando valores originais');
+      return values;
+    }
+    
+    if (values.length !== this.scalerMean.length || values.length !== this.scalerScale.length) {
+      console.error(`❌ Dimensão incompatível: valores=${values.length}, mean=${this.scalerMean.length}, scale=${this.scalerScale.length}`);
+      return values;
+    }
+    
+    return values.map((val, idx) => {
+      const mean = this.scalerMean![idx];
+      const scale = this.scalerScale![idx];
+      
+      // Evita divisão por zero
+      if (scale === 0) {
+        console.warn(`⚠️ Scale zero no índice ${idx}, usando valor original`);
+        return val;
+      }
+      
+      return (val - mean) / scale;
+    });
+  }
+
+  /**
    * Cria modelo placeholder para desenvolvimento
    * Substitua por seu modelo treinado em produção
    */
@@ -706,39 +779,26 @@ export class MLService {
         input = features.expandDims(0);
       }
 
-      // AVISO: Os valores de input estão muito altos (2.0+)
-      // Isso pode indicar que o modelo foi treinado com dados normalizados
+      // Aplica normalização StandardScaler (z-score)
+      // O modelo foi treinado com StandardScaler, então devemos usar a mesma normalização
       const inputArray = await input.array();
       const inputValues = inputArray[0] as number[];
-      const maxValue = Math.max(...inputValues);
-      const minValue = Math.min(...inputValues);
       
-      console.log('📊 Valores antes da normalização:');
+      console.log('📊 Valores antes da normalização StandardScaler:');
       console.log('  Primeiros 10:', inputValues.slice(0, 10));
-      console.log('  Min:', minValue, 'Max:', maxValue);
+      console.log('  Min:', Math.min(...inputValues), 'Max:', Math.max(...inputValues));
       
-      // Se os valores estão muito altos (> 1.5), aplica normalização
-      // O modelo pode ter sido treinado com dados normalizados
-      if (Math.abs(maxValue) > 1.5 || Math.abs(minValue) > 1.5) {
-        console.log('⚠️ Valores altos detectados, aplicando normalização...');
-        
-        // Normalização min-max para [0, 1] (mais comum para MFCC)
-        const range = maxValue - minValue;
-        if (range > 0) {
-          const normalizedValues = inputValues.map(val => (val - minValue) / range);
-          
-          // Cria novo tensor normalizado
-          input.dispose();
-          input = tf.tensor2d([normalizedValues], [1, normalizedValues.length]);
-          
-          console.log('📊 Valores após normalização min-max [0,1]:');
-          console.log('  Primeiros 10:', normalizedValues.slice(0, 10));
-        } else {
-          console.log('⚠️ Range zero, pulando normalização');
-        }
-      } else {
-        console.log('✅ Valores já parecem normalizados');
-      }
+      // Aplica StandardScaler (z-score normalization)
+      const normalizedValues = this.applyStandardScaler(inputValues);
+      
+      // Cria novo tensor normalizado
+      input.dispose();
+      input = tf.tensor2d([normalizedValues], [1, normalizedValues.length]);
+      
+      console.log('📊 Valores após normalização StandardScaler (z-score):');
+      console.log('  Primeiros 10:', normalizedValues.slice(0, 10));
+      console.log('  Min:', Math.min(...normalizedValues), 'Max:', Math.max(...normalizedValues));
+      console.log('  Média esperada: ~0, Desvio padrão esperado: ~1');
 
       // Faz predição
       console.log('🤖 Executando modelo de ML...');
@@ -811,6 +871,15 @@ export class MLService {
       } else if (features.shape.length === 1) {
         input = features.expandDims(0);
       }
+
+      // Aplica normalização StandardScaler (z-score)
+      const inputArray = await input.array();
+      const inputValues = inputArray[0] as number[];
+      const normalizedValues = this.applyStandardScaler(inputValues);
+      
+      // Cria novo tensor normalizado
+      input.dispose();
+      input = tf.tensor2d([normalizedValues], [1, normalizedValues.length]);
 
       // Faz predição
       const prediction = this.model!.predict(input) as tf.Tensor;

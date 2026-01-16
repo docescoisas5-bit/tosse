@@ -122,6 +122,34 @@ export default function RootLayout() {
               headerShown: false,
             }} 
           />
+          <Stack.Screen 
+            name="(auth)/forgot-password" 
+            options={{ 
+              title: 'Redefinir Senha',
+              headerShown: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="(auth)/verify-code" 
+            options={{ 
+              title: 'Verificar Código',
+              headerShown: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="(auth)/reset-password" 
+            options={{ 
+              title: 'Nova Senha',
+              headerShown: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="(auth)/reset-password-callback" 
+            options={{ 
+              title: 'Processando',
+              headerShown: false,
+            }} 
+          />
         </Stack>
       </AuthProvider>
     </GestureHandlerRootView>

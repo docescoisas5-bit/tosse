@@ -1,115 +1,102 @@
 """
-Script para Google Colab - Converter Modelo Keras para TensorFlow.js
-Copie e cole cada seção em células separadas no Colab
+Script para converter modelo Keras para TensorFlow.js no Google Colab
+Copie e cole este código em uma célula do Colab
 """
 
-# ============================================================================
-# CÉLULA 1: Instalar Dependências
-# ============================================================================
-# Atualiza packaging para resolver conflitos de dependências
-!pip install --upgrade packaging -q
-
-# Instala tensorflowjs
+# ============================================
+# PASSO 1: Instalar dependências
+# ============================================
+print("📦 Instalando dependências...")
 !pip install tensorflowjs -q
 
-print('✅ Dependências instaladas com sucesso!')
+# ============================================
+# PASSO 2: Fazer upload do modelo
+# ============================================
+print("\n📤 Faça upload do arquivo cough_model.h5")
+print("   (Execute a célula e clique em 'Escolher arquivos')")
 
-# ============================================================================
-# CÉLULA 2: Fazer Upload do Modelo
-# ============================================================================
 from google.colab import files
 import os
 
-# Faz upload do arquivo (selecione cough_model.h5)
-# ⚠️ IMPORTANTE: Quando executar, aparecerá um botão "Choose Files"
-# Clique nele e selecione o arquivo cough_model.h5
+# Cria diretório se não existir
+os.makedirs('models', exist_ok=True)
+
+# Upload do arquivo
 uploaded = files.upload()
 
-# Verifica se o arquivo foi enviado
+# Move arquivo para models/ se necessário
 for filename in uploaded.keys():
-    print(f'✅ Arquivo recebido: {filename}')
-    print(f'📦 Tamanho: {len(uploaded[filename]) / 1024 / 1024:.2f} MB')
+    if filename.endswith('.h5'):
+        if not filename.startswith('models/'):
+            os.rename(filename, f'models/{filename}')
+        print(f"✅ Arquivo carregado: models/{filename}")
 
-# ============================================================================
-# CÉLULA 3: Converter para TensorFlow.js
-# ============================================================================
-import tensorflow as tf
+# ============================================
+# PASSO 3: Carregar e converter modelo
+# ============================================
+print("\n🔄 Convertendo modelo para TensorFlow.js...")
+
 import tensorflowjs as tfjs
-from pathlib import Path
+from tensorflow import keras
+
+# Encontra o arquivo do modelo
+model_files = [f for f in os.listdir('models') if f.endswith('.h5')]
+if not model_files:
+    raise FileNotFoundError("❌ Nenhum arquivo .h5 encontrado em models/")
+
+model_path = f'models/{model_files[0]}'
+print(f"📂 Carregando modelo: {model_path}")
+
+# Carrega modelo
+model = keras.models.load_model(model_path)
+print(f"✅ Modelo carregado!")
+print(f"   Input shape: {model.input_shape}")
+print(f"   Output shape: {model.output_shape}")
+
+# Converte para TensorFlow.js
+output_dir = 'models/tfjs_model'
+print(f"\n🔄 Convertendo para TensorFlow.js...")
+tfjs.converters.save_keras_model(model, output_dir)
+
+print(f"\n✅ Conversão concluída!")
+print(f"📁 Modelo TensorFlow.js salvo em: {output_dir}")
+
+# ============================================
+# PASSO 4: Listar arquivos gerados
+# ============================================
+print("\n📦 Arquivos gerados:")
+import os
+for file in sorted(os.listdir(output_dir)):
+    file_path = os.path.join(output_dir, file)
+    size = os.path.getsize(file_path) / 1024  # KB
+    print(f"   - {file} ({size:.2f} KB)")
+
+# ============================================
+# PASSO 5: Baixar modelo convertido
+# ============================================
+print("\n📥 Preparando download...")
+
+# Cria arquivo ZIP
+import zipfile
 import shutil
 
-# Nome do arquivo (ajuste se necessário)
-model_file = 'cough_model.h5'
-output_dir = 'tfjs_model'
-
-# Verifica se o arquivo existe
-if not os.path.exists(model_file):
-    print(f'❌ Erro: Arquivo {model_file} não encontrado!')
-    print('Certifique-se de fazer o upload na célula anterior')
-else:
-    print(f'📂 Carregando modelo: {model_file}')
-    
-    # Carrega o modelo
-    model = tf.keras.models.load_model(model_file)
-    print('✅ Modelo carregado com sucesso')
-    print(f'📊 Input shape: {model.input_shape}')
-    print(f'📊 Output shape: {model.output_shape}')
-    
-    # Remove diretório de saída se existir
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    
-    # Converte para TensorFlow.js
-    print(f'\n🔄 Convertendo para TensorFlow.js...')
-    tfjs.converters.save_keras_model(model, output_dir)
-    
-    print(f'\n✅ Conversão concluída!')
-    print(f'📁 Modelo salvo em: {output_dir}/')
-    print('\n📦 Arquivos gerados:')
-    
-    total_size = 0
-    for file in sorted(Path(output_dir).glob('*')):
-        size = file.stat().st_size / 1024  # KB
-        total_size += size
-        print(f'   - {file.name} ({size:.2f} KB)')
-    
-    print(f'\n📊 Tamanho total: {total_size / 1024:.2f} MB')
-
-# ============================================================================
-# CÉLULA 4: Baixar Arquivos Convertidos
-# ============================================================================
-import zipfile
-from google.colab import files
-
-# Cria arquivo ZIP com todos os arquivos do modelo
-zip_filename = 'tfjs_model.zip'
-
-print('📦 Criando arquivo ZIP...')
-with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-    for root, dirs, files_list in os.walk('tfjs_model'):
-        for file in files_list:
+zip_path = 'tfjs_model.zip'
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    for root, dirs, files in os.walk(output_dir):
+        for file in files:
             file_path = os.path.join(root, file)
-            arcname = os.path.relpath(file_path, 'tfjs_model')
+            arcname = os.path.relpath(file_path, output_dir)
             zipf.write(file_path, arcname)
-            print(f'   ✅ Adicionado: {file}')
 
-print(f'\n✅ Arquivo ZIP criado: {zip_filename}')
-print(f'📦 Tamanho: {os.path.getsize(zip_filename) / 1024 / 1024:.2f} MB')
-print('\n⬇️ Baixando arquivo...')
+print(f"✅ ZIP criado: {zip_path}")
+print(f"\n📥 Baixando arquivo...")
+files.download(zip_path)
 
-# Faz download do ZIP
-files.download(zip_filename)
-
-print('\n✅ Download concluído!')
-print('\n' + '='*60)
-print('📝 PRÓXIMOS PASSOS:')
-print('='*60)
-print('1. Extraia o arquivo tfjs_model.zip')
-print('2. Acesse: https://supabase.com/dashboard/project/gorslmmmivhbjrczsoie/storage/buckets')
-print('3. Crie bucket público: ml-models')
-print('4. Crie pasta: cough-model')
-print('5. Faça upload de TODOS os arquivos de tfjs_model/')
-print('6. Configure no .env:')
-print('   EXPO_PUBLIC_MODEL_URL=https://gorslmmmivhbjrczsoie.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json')
-print('='*60)
-
+print("\n" + "="*60)
+print("✅ CONVERSÃO CONCLUÍDA!")
+print("="*60)
+print("\n📝 Próximos passos:")
+print("   1. Extraia o arquivo tfjs_model.zip")
+print("   2. Faça upload da pasta 'tfjs_model' para Supabase Storage")
+print("   3. Configure EXPO_PUBLIC_MODEL_URL no .env do app")
+print("   4. URL exemplo: https://seu-projeto.supabase.co/storage/v1/object/public/ml-models/tfjs_model/model.json")
