@@ -127,6 +127,8 @@ E altere `eas.json`:
 2. Execute `eas init` se ainda não configurou
 3. Verifique se o projeto está vinculado: `eas project:info`
 
+**⚠️ Para CI/CD**: Se você está configurando para CI/CD, consulte [EAS_CI_CD.md](./EAS_CI_CD.md) para instruções específicas.
+
 ### Erro: "appVersionSource is not set"
 
 **Solução**: O arquivo `eas.json` já está configurado com `appVersionSource: "remote"`. Se ainda aparecer o erro, verifique se o arquivo está salvo corretamente.
@@ -146,11 +148,20 @@ Após configurar o EAS:
 2. **Submeter para Lojas**: Use `eas submit` (requer configuração adicional)
 3. **Atualizações OTA**: Use `eas update` para atualizações sem rebuild
 
+## 🔄 Builds em CI/CD
+
+Se você está configurando builds em ambientes CI/CD (GitHub Actions, GitLab CI, etc.), consulte:
+
+- **[EAS_CI_CD.md](./EAS_CI_CD.md)** - Guia completo para configurar EAS Build em CI/CD
+
+**Importante**: O projeto EAS **deve ser configurado localmente primeiro** com `eas init` antes de fazer builds em CI/CD.
+
 ## 🔗 Links Úteis
 
 - [Documentação EAS Build](https://docs.expo.dev/build/introduction/)
 - [EAS Secrets](https://docs.expo.dev/build-reference/variables/)
 - [Versionamento de Apps](https://docs.expo.dev/build-reference/app-versions/)
+- [EAS Build em CI/CD](https://docs.expo.dev/build/building-on-ci/)
 
 ---
 
