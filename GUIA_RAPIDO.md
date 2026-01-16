@@ -26,7 +26,9 @@ npm run ios                  # Abre no iOS
 npm run web                  # Abre no navegador
 
 # EAS Build (Recomendado)
-eas build:configure         # Configura EAS Build
+eas login                   # Login no EAS (primeira vez)
+eas init                   # Inicializar projeto EAS (OBRIGATÓRIO na primeira vez)
+eas build:configure         # Configura EAS Build (opcional, já temos eas.json)
 eas build --platform android # Build para Android
 eas build --platform ios    # Build para iOS
 eas build --platform all    # Build para ambas plataformas
@@ -145,12 +147,22 @@ await signOut();
 - Se ainda aparecer o erro, execute: `eas build:configure`
 - Ou instale EAS CLI: `npm install -g eas-cli`
 
+### Erro: "EAS project not configured"
+- Execute `eas init` para configurar o projeto (obrigatório na primeira vez)
+- Verifique se está logado: `eas whoami`
+- Consulte [CONFIGURAR_EAS.md](./CONFIGURAR_EAS.md) para guia completo
+
+### Erro: "appVersionSource is not set"
+- O arquivo `eas.json` já está configurado com `appVersionSource: "remote"`
+- Verifique se o arquivo está salvo corretamente
+
 ## 📚 Documentação Completa
 
 Para informações detalhadas, consulte:
 - **[DOCUMENTACAO_COMPLETA.md](./DOCUMENTACAO_COMPLETA.md)** - Documentação completa do projeto
 - **[README.md](./README.md)** - Documentação básica
 - **[CONFIGURAR_RESET_SENHA.md](./CONFIGURAR_RESET_SENHA.md)** - Configuração de reset de senha
+- **[CONFIGURAR_EAS.md](./CONFIGURAR_EAS.md)** - Configuração inicial do EAS Build
 
 ## 🔗 Links Úteis
 

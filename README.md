@@ -7,6 +7,7 @@ Aplicação móvel desenvolvida com React Native e Expo para análise de sons de
 - **[📖 Documentação Completa](./DOCUMENTACAO_COMPLETA.md)** - Documentação técnica completa com todas as propriedades de engenharia de software
 - **[🚀 Guia Rápido](./GUIA_RAPIDO.md)** - Guia rápido de referência para desenvolvedores
 - **[🔐 Configurar Reset de Senha](./CONFIGURAR_RESET_SENHA.md)** - Guia de configuração de redefinição de senha
+- **[⚙️ Configurar EAS Build](./CONFIGURAR_EAS.md)** - Guia de configuração inicial do EAS Build
 
 ## 🎯 Funcionalidades
 

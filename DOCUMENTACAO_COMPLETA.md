@@ -987,7 +987,7 @@ describe('MLService', () => {
 
 ## 11. Deploy e Distribuição
 
-### 11.1 Configuração do EAS Build
+### 11.1 Configuração Inicial do EAS Build
 
 O projeto utiliza **EAS Build** (Expo Application Services) para builds de produção. O arquivo `eas.json` contém as configurações necessárias.
 
@@ -1001,12 +1001,28 @@ npm install -g eas-cli
 eas login
 ```
 
-#### Configurar Projeto
+#### Inicializar Projeto EAS (OBRIGATÓRIO)
 ```bash
-eas build:configure
+eas init
 ```
 
-Isso criará/atualizará o arquivo `eas.json` com as configurações apropriadas.
+**⚠️ IMPORTANTE**: Este comando é obrigatório na primeira vez. Ele:
+- Cria um projeto EAS vinculado à sua conta Expo
+- Configura o projeto no Expo Dashboard
+- Gera um ID único para o projeto
+
+**Nota**: Se você já tem um projeto Expo, o comando irá vinculá-lo. Se não, criará um novo.
+
+#### Verificar Configuração
+```bash
+# Verificar informações do projeto
+eas project:info
+
+# Listar secrets configurados
+eas secret:list
+```
+
+**📖 Guia Completo**: Consulte [CONFIGURAR_EAS.md](./CONFIGURAR_EAS.md) para instruções detalhadas.
 
 ### 11.2 Build para Produção
 
@@ -1076,7 +1092,33 @@ eas secret:create --scope project --name EXPO_PUBLIC_MODEL_URL --value "https://
 - Não deixe variáveis vazias no `eas.json` (causa erro de validação)
 - Use `eas secret:create` para variáveis sensíveis
 
-### 11.4 Perfis de Build no EAS
+### 11.4 Versionamento de Apps
+
+O projeto está configurado para usar **versionamento remoto** (`appVersionSource: "remote"`), o que significa que o EAS gerencia automaticamente os números de versão durante os builds.
+
+#### Configuração Atual
+- **appVersionSource**: `"remote"` (gerenciado pelo EAS)
+- **version**: `"1.0.0"` (no `app.json`)
+- **android.versionCode**: `1` (inicial)
+- **ios.buildNumber**: `"1"` (inicial)
+
+O EAS incrementa automaticamente `versionCode` (Android) e `buildNumber` (iOS) a cada build.
+
+#### Versionamento Manual (Opcional)
+
+Se preferir controlar manualmente, altere `eas.json`:
+
+```json
+{
+  "cli": {
+    "appVersionSource": "local"
+  }
+}
+```
+
+E atualize manualmente `versionCode` e `buildNumber` no `app.json` antes de cada build.
+
+### 11.5 Perfis de Build no EAS
 
 O arquivo `eas.json` define três perfis de build:
 
@@ -1098,7 +1140,7 @@ O arquivo `eas.json` define três perfis de build:
 - iOS: IPA (App Store)
 - Otimizado para produção
 
-### 11.5 Distribuição
+### 11.6 Distribuição
 
 #### Google Play Store
 1. Crie conta de desenvolvedor
@@ -1112,7 +1154,7 @@ O arquivo `eas.json` define três perfis de build:
 3. Faça upload via Xcode ou Transporter
 4. Submeta para revisão
 
-### 11.6 Atualizações OTA (Over-The-Air)
+### 11.7 Atualizações OTA (Over-The-Air)
 
 Com EAS Update, é possível atualizar o app sem reenviar para as lojas:
 
