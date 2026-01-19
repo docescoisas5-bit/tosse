@@ -9,7 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  ImageBackground,
 } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
@@ -38,155 +37,71 @@ export default function LoginScreen() {
     }
   };
 
-  // Tenta carregar a imagem de fundo
-  // Nota: Arquivo renomeado para evitar problemas no build Android
-  let backgroundImage;
-  try {
-    // Tenta carregar com nome sem hífen primeiro (recomendado)
-    backgroundImage = require('../../assets/images/respiratory_background.png');
-  } catch (e) {
-    try {
-      // Fallback para nome com hífen (pode causar problemas no Android)
-      backgroundImage = require('../../assets/images/respiratory-background.png');
-    } catch (e2) {
-      backgroundImage = null;
-    }
-  }
-
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      {backgroundImage ? (
-        <ImageBackground
-          source={backgroundImage}
-          style={styles.backgroundImage}
-          resizeMode="cover"
-        >
-          <LinearGradient
-            colors={['rgba(0, 0, 0, 0.6)', 'rgba(0, 0, 0, 0.4)']}
-            style={styles.overlay}
-          >
-            <View style={styles.content}>
-              <Text style={styles.title}>Análise de Tosse</Text>
-              <Text style={styles.subtitle}>Faça login para continuar</Text>
+      <LinearGradient
+        colors={['#667eea', '#764ba2', '#1a237e']}
+        style={styles.gradient}
+      >
+        <View style={styles.content}>
+          <Text style={styles.title}>Análise de Tosse</Text>
+          <Text style={styles.subtitle}>Faça login para continuar</Text>
 
-              <View style={styles.form}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email"
-                  placeholderTextColor="#999"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                />
+          <View style={styles.form}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#999"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
 
-                <TextInput
-                  style={styles.input}
-                  placeholder="Senha"
-                  placeholderTextColor="#999"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                  autoCapitalize="none"
-                />
+            <TextInput
+              style={styles.input}
+              placeholder="Senha"
+              placeholderTextColor="#999"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCapitalize="none"
+            />
 
-                <TouchableOpacity
-                  style={[styles.button, loading && styles.buttonDisabled]}
-                  onPress={handleLogin}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.buttonText}>Entrar</Text>
-                  )}
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Entrar</Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.forgotPasswordButton}
+              onPress={() => router.push('/(auth)/forgot-password')}
+            >
+              <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
+            </TouchableOpacity>
+
+            <View style={styles.linkContainer}>
+              <Text style={styles.linkText}>Não tem uma conta? </Text>
+              <Link href="/(auth)/register" asChild>
+                <TouchableOpacity>
+                  <Text style={styles.link}>Registre-se</Text>
                 </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.forgotPasswordButton}
-                  onPress={() => router.push('/(auth)/forgot-password')}
-                >
-                  <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
-                </TouchableOpacity>
-
-                <View style={styles.linkContainer}>
-                  <Text style={styles.linkText}>Não tem uma conta? </Text>
-                  <Link href="/(auth)/register" asChild>
-                    <TouchableOpacity>
-                      <Text style={styles.link}>Registre-se</Text>
-                    </TouchableOpacity>
-                  </Link>
-                </View>
-              </View>
-            </View>
-          </LinearGradient>
-        </ImageBackground>
-      ) : (
-        <LinearGradient
-          colors={['#667eea', '#764ba2', '#1a237e']}
-          style={styles.fallbackGradient}
-        >
-          <View style={styles.content}>
-            <Text style={styles.title}>Análise de Tosse</Text>
-            <Text style={styles.subtitle}>Faça login para continuar</Text>
-
-            <View style={styles.form}>
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#999"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Senha"
-                placeholderTextColor="#999"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-              />
-
-              <TouchableOpacity
-                style={[styles.button, loading && styles.buttonDisabled]}
-                onPress={handleLogin}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.buttonText}>Entrar</Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.forgotPasswordButton}
-                onPress={() => router.push('/(auth)/forgot-password')}
-              >
-                <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
-              </TouchableOpacity>
-
-              <View style={styles.linkContainer}>
-                <Text style={styles.linkText}>Não tem uma conta? </Text>
-                <Link href="/(auth)/register" asChild>
-                  <TouchableOpacity>
-                    <Text style={styles.link}>Registre-se</Text>
-                  </TouchableOpacity>
-                </Link>
-              </View>
+              </Link>
             </View>
           </View>
-        </LinearGradient>
-      )}
+        </View>
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 }
@@ -195,17 +110,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  fallbackGradient: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-  },
-  overlay: {
+  gradient: {
     flex: 1,
     width: '100%',
     height: '100%',

@@ -6,7 +6,9 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "assetBundlePatterns": [
-      "**/*"
+      "**/*",
+      "!assets/images/respiratory_background.png",
+      "!assets/images/respiratory-background.png"
     ],
     "ios": {
       "supportsTablet": true,
