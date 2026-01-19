@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/images/iconeandroid.png",
     "assetBundlePatterns": [
       "**/*",
       "!assets/images/respiratory_background.png",
@@ -17,6 +18,10 @@
     },
     "android": {
       "package": "com.coughanalysis.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/iconeandroid.png",
+        "backgroundColor": "#FFFFFF"
+      },
       "permissions": [
         "RECORD_AUDIO",
         "WRITE_EXTERNAL_STORAGE",
