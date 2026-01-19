@@ -84,10 +84,12 @@ Isso permite que builds em CI/CD funcionem em modo não-interativo.
 eas build --platform android --profile preview
 ```
 
-#### Android (AAB para produção)
+#### Android (APK para produção)
 ```bash
 eas build --platform android --profile production
 ```
+
+**Nota**: O perfil `production` está configurado para gerar APK. Se precisar de AAB para Google Play, altere `buildType` para `"app-bundle"` no `eas.json`.
 
 #### iOS (Simulador)
 ```bash

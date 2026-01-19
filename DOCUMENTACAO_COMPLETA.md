@@ -1034,11 +1034,13 @@ eas secret:list
 eas build --platform android --profile preview
 ```
 
-##### Build AAB (Google Play Store)
+##### Build APK (Produção/Testes)
 ```bash
-# Build AAB para produção
+# Build APK para produção
 eas build --platform android --profile production
 ```
+
+**Nota**: O perfil `production` está configurado para gerar APK. Se precisar de AAB para Google Play Store, altere `buildType` para `"app-bundle"` no `eas.json` na seção `production.android`.
 
 #### iOS
 
