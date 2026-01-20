@@ -40,7 +40,10 @@ eas secret:create --scope project --name EXPO_PUBLIC_MODEL_URL --value "https://
 ### Passo 3: Verificar Configuração
 
 ```bash
-# Listar todos os secrets configurados
+# Listar todas as variáveis de ambiente configuradas (comando atualizado)
+eas env:list
+
+# OU (comando antigo, ainda funciona mas está deprecated)
 eas secret:list
 ```
 
@@ -59,19 +62,46 @@ eas build --platform android --profile production --non-interactive
 
 ## 🔍 Verificação Adicional
 
+### ✅ Variáveis Já Configuradas?
+
+Se você já configurou as variáveis e o app ainda crasha, o problema pode ser:
+
+1. **Build antigo**: O build foi feito ANTES de configurar as variáveis
+   - **Solução**: Faça um novo build após configurar as variáveis
+
+2. **Valor vazio**: A variável está configurada mas com valor vazio
+   - **Solução**: Verifique os valores com `eas env:list` e reconfigura se necessário
+
+3. **Erro diferente**: Pode ser outro erro não relacionado às variáveis
+   - **Solução**: Verifique os logs do app (veja abaixo)
+
 ### Verificar Logs do App
 
-Se o app ainda crashar, você pode verificar os logs:
+**IMPORTANTE**: Os logs mostram o erro real que está causando o crash.
 
 **Android (via ADB):**
 ```bash
-adb logcat | grep -i "cough\|supabase\|error"
+# Conectar dispositivo via USB e habilitar USB Debugging
+# Depois execute:
+
+# Ver todos os erros
+adb logcat *:E
+
+# Filtrar por termos específicos
+adb logcat | grep -i "cough\|supabase\|error\|exception\|crash"
+
+# Ver logs do React Native
+adb logcat | grep -i "ReactNativeJS"
+
+# Ver logs completos e salvar em arquivo
+adb logcat > app_logs.txt
 ```
 
-**Ou usar o comando:**
-```bash
-adb logcat *:E
-```
+**Procurar por:**
+- `Variáveis do Supabase não configuradas`
+- `EXPO_PUBLIC_SUPABASE_ANON_KEY está vazia`
+- `Error:` ou `Exception:`
+- `FATAL EXCEPTION`
 
 ### Verificar se Variáveis Estão Sendo Passadas
 
@@ -103,10 +133,13 @@ eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value "https
 eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "SUA_CHAVE_AQUI"
 eas secret:create --scope project --name EXPO_PUBLIC_MODEL_URL --value "https://gorslmmmivhbjrczsoie.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json"
 
-# Verificar
+# Verificar (comando atualizado)
+eas env:list
+
+# OU (comando antigo)
 eas secret:list
 
-# Fazer build
+# Fazer build (IMPORTANTE: faça DEPOIS de configurar as variáveis)
 eas build --platform android --profile production --non-interactive
 ```
 
