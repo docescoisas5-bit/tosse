@@ -14,7 +14,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.coughanalysis.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "associatedDomains": [
+        "applinks:tosse.app"
+      ]
     },
     "android": {
       "package": "com.coughanalysis.app",
@@ -39,9 +42,6 @@
       ]
     ],
     "scheme": "coughanalysis",
-    "associatedDomains": [
-      "applinks:tosse.app"
-    ],
     "extra": {
       "modelUrl": "https://gorslmmmivhbjrczsoie.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json",
       "supabaseUrl": "https://gorslmmmivhbjrczsoie.supabase.co",
