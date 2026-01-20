@@ -9,6 +9,8 @@ Aplicação móvel desenvolvida com React Native e Expo para análise de sons de
 - **[🔐 Configurar Reset de Senha](./CONFIGURAR_RESET_SENHA.md)** - Guia de configuração de redefinição de senha
 - **[⚙️ Configurar EAS Build](./CONFIGURAR_EAS.md)** - Guia de configuração inicial do EAS Build
 - **[🔄 EAS Build em CI/CD](./EAS_CI_CD.md)** - Guia para configurar builds em ambientes CI/CD
+- **[🔧 Troubleshooting: App Fecha ao Abrir](./TROUBLESHOOTING_APP_CRASH.md)** - Solução para app que fecha imediatamente
+- **[🔧 Troubleshooting: Build Errors](./TROUBLESHOOTING_BUILD.md)** - Erros comuns de build
 - **[🔑 Configurar Credenciais](./CONFIGURAR_CREDENCIAIS.md)** - Guia para configurar keystore Android e certificados iOS
 
 ## 🎯 Funcionalidades
