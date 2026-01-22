@@ -189,30 +189,72 @@ export class AudioPreprocessor {
 
   /**
    * Normaliza o áudio para o range [-1, 1]
+   * OTIMIZADO: Usa loop simples em vez de Math.max com spread
    */
   normalizeAudio(audioData: Float32Array): Float32Array {
-    const max = Math.max(...Array.from(audioData.map(Math.abs)));
+    // Encontra o máximo usando loop simples (muito mais rápido)
+    let max = 0;
+    for (let i = 0; i < audioData.length; i++) {
+      const abs = Math.abs(audioData[i]);
+      if (abs > max) max = abs;
+    }
+    
     if (max === 0) return audioData;
-    return new Float32Array(audioData.map(sample => sample / max));
+    
+    // Normaliza usando loop simples
+    const normalized = new Float32Array(audioData.length);
+    for (let i = 0; i < audioData.length; i++) {
+      normalized[i] = audioData[i] / max;
+    }
+    
+    return normalized;
   }
 
   /**
    * Remove ruído usando filtro simples (média móvel)
+   * OTIMIZADO: Reduzido windowSize padrão e otimizado loops
    */
-  removeNoise(audioData: Float32Array, windowSize: number = 5): Float32Array {
-    const filtered = new Float32Array(audioData.length);
+  removeNoise(audioData: Float32Array, windowSize: number = 3): Float32Array {
+    // Para áudios muito longos, aplica downsampling primeiro
+    const maxLength = 16000 * 5; // 5 segundos máximo
+    let dataToFilter = audioData;
+    
+    if (audioData.length > maxLength) {
+      // Downsample para acelerar processamento
+      const ratio = Math.ceil(audioData.length / maxLength);
+      const downsampled = new Float32Array(Math.floor(audioData.length / ratio));
+      for (let i = 0; i < downsampled.length; i++) {
+        downsampled[i] = audioData[i * ratio];
+      }
+      dataToFilter = downsampled;
+    }
+    
+    const filtered = new Float32Array(dataToFilter.length);
     const halfWindow = Math.floor(windowSize / 2);
 
-    for (let i = 0; i < audioData.length; i++) {
+    // Otimizado: calcula janela deslizante de forma mais eficiente
+    for (let i = 0; i < dataToFilter.length; i++) {
+      const start = Math.max(0, i - halfWindow);
+      const end = Math.min(dataToFilter.length, i + halfWindow + 1);
+      const count = end - start;
+      
       let sum = 0;
-      let count = 0;
-
-      for (let j = Math.max(0, i - halfWindow); j < Math.min(audioData.length, i + halfWindow + 1); j++) {
-        sum += audioData[j];
-        count++;
+      for (let j = start; j < end; j++) {
+        sum += dataToFilter[j];
       }
-
+      
       filtered[i] = sum / count;
+    }
+
+    // Se fez downsampling, interpola de volta
+    if (audioData.length > maxLength) {
+      const upsampled = new Float32Array(audioData.length);
+      const ratio = Math.ceil(audioData.length / filtered.length);
+      for (let i = 0; i < audioData.length; i++) {
+        const idx = Math.floor(i / ratio);
+        upsampled[i] = filtered[Math.min(idx, filtered.length - 1)];
+      }
+      return upsampled;
     }
 
     return filtered;
@@ -220,6 +262,7 @@ export class AudioPreprocessor {
 
   /**
    * Calcula MFCC (Mel Frequency Cepstral Coefficients)
+   * OTIMIZADO: Conversão mais eficiente de Float32Array para array
    */
   async computeMFCC(audioData: Float32Array): Promise<tf.Tensor> {
     // Garante que TensorFlow.js está inicializado
@@ -230,12 +273,21 @@ export class AudioPreprocessor {
       throw new Error('Dados de áudio vazios ou inválidos');
     }
 
-    // Converte Float32Array para array JavaScript normal
-    // No React Native, TensorFlow.js funciona melhor com arrays JavaScript simples
-    // Usa uma conversão mais explícita para garantir que seja um array JavaScript puro
-    const audioArray: number[] = [];
-    for (let i = 0; i < audioData.length; i++) {
-      audioArray.push(audioData[i]);
+    // OTIMIZADO: Usa Array.from() que é mais rápido que loop manual
+    // Para arrays muito grandes, faz amostragem
+    let audioArray: number[];
+    const maxSamples = 80000; // ~5 segundos a 16kHz
+    
+    if (audioData.length > maxSamples) {
+      // Amostra o áudio para acelerar processamento
+      const ratio = Math.ceil(audioData.length / maxSamples);
+      audioArray = new Array(Math.floor(audioData.length / ratio));
+      for (let i = 0; i < audioArray.length; i++) {
+        audioArray[i] = audioData[i * ratio];
+      }
+    } else {
+      // Usa Array.from() que é otimizado pelo JavaScript engine
+      audioArray = Array.from(audioData);
     }
     
     // Valida que o array tem dados válidos
@@ -397,8 +449,6 @@ export class AudioPreprocessor {
     frameTensors.forEach(t => t.dispose());
     
     return frames;
-
-    return tf.tensor2d(frames);
   }
 
   /**
@@ -462,9 +512,13 @@ export class AudioPreprocessor {
 
   /**
    * Processa áudio completo para modelo a partir de URI
+   * OTIMIZADO: Limita duração do áudio processado
    */
   async preprocessAudioFromUri(uri: string): Promise<tf.Tensor> {
     try {
+      console.log('🎵 Iniciando processamento de áudio...');
+      const startTime = Date.now();
+      
       // Converte URI diretamente para Float32Array usando expo-av
       let float32Data = await this.audioUriToFloat32Array(uri);
 
@@ -473,19 +527,32 @@ export class AudioPreprocessor {
         throw new Error('Não foi possível obter dados de áudio válidos');
       }
 
+      // OTIMIZAÇÃO: Limita áudio a 5 segundos (80.000 samples a 16kHz)
+      const maxSamples = this.SAMPLE_RATE * 5;
+      if (float32Data.length > maxSamples) {
+        console.log(`⏱️ Áudio muito longo (${(float32Data.length / this.SAMPLE_RATE).toFixed(1)}s), limitando a 5s...`);
+        float32Data = float32Data.slice(0, maxSamples);
+      }
+
       // Garante que temos pelo menos alguns samples
       if (float32Data.length < 100) {
         console.warn('Áudio muito curto, pode não produzir resultados confiáveis');
       }
 
+      console.log(`📊 Áudio: ${(float32Data.length / this.SAMPLE_RATE).toFixed(2)}s, ${float32Data.length} samples`);
+
       // Normaliza
       float32Data = this.normalizeAudio(float32Data);
 
-      // Remove ruído (filtro Wiener simplificado)
+      // Remove ruído (filtro simplificado e otimizado)
       float32Data = this.removeNoise(float32Data);
 
       // Calcula MFCC
+      console.log('🔢 Calculando características MFCC...');
       const mfcc = await this.computeMFCC(float32Data);
+      
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✅ Áudio processado em ${elapsed}s`);
 
       return mfcc;
     } catch (error) {

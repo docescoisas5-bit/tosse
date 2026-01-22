@@ -763,7 +763,9 @@ export class MLService {
     }
 
     try {
-      console.log('🎵 Processando áudio (isso pode levar alguns segundos)...');
+      const startTime = Date.now();
+      console.log('🎵 Processando áudio...');
+      
       // Pré-processa áudio a partir da URI
       const features = await audioPreprocessor.preprocessAudioFromUri(audioUri);
       console.log('✅ Áudio processado, shape:', features.shape);
@@ -772,21 +774,17 @@ export class MLService {
       // Redimensiona se necessário
       let input = features;
       if (features.shape.length === 2) {
-        // Se for 2D, precisa fazer reshape ou média
-        console.log('📊 Calculando média das características...');
+        // Se for 2D, calcula média das características
         input = tf.mean(features, 0).expandDims(0);
+        features.dispose(); // Limpa imediatamente
       } else if (features.shape.length === 1) {
         input = features.expandDims(0);
       }
 
       // Aplica normalização StandardScaler (z-score)
-      // O modelo foi treinado com StandardScaler, então devemos usar a mesma normalização
+      // OTIMIZADO: Reduz logs e otimiza conversões
       const inputArray = await input.array();
       const inputValues = inputArray[0] as number[];
-      
-      console.log('📊 Valores antes da normalização StandardScaler:');
-      console.log('  Primeiros 10:', inputValues.slice(0, 10));
-      console.log('  Min:', Math.min(...inputValues), 'Max:', Math.max(...inputValues));
       
       // Aplica StandardScaler (z-score normalization)
       const normalizedValues = this.applyStandardScaler(inputValues);
@@ -794,47 +792,29 @@ export class MLService {
       // Cria novo tensor normalizado
       input.dispose();
       input = tf.tensor2d([normalizedValues], [1, normalizedValues.length]);
-      
-      console.log('📊 Valores após normalização StandardScaler (z-score):');
-      console.log('  Primeiros 10:', normalizedValues.slice(0, 10));
-      console.log('  Min:', Math.min(...normalizedValues), 'Max:', Math.max(...normalizedValues));
-      console.log('  Média esperada: ~0, Desvio padrão esperado: ~1');
 
       // Faz predição
       console.log('🤖 Executando modelo de ML...');
-      console.log('📊 Input shape:', input.shape);
-      
       const prediction = this.model!.predict(input) as tf.Tensor;
       const probabilities = await prediction.array() as number[][];
 
       const [normal, bronchitis, pneumonia] = probabilities[0];
-      
-      // LOGS DETALHADOS PARA DEBUG
-      console.log('📊 PROBABILIDADES BRUTAS:');
-      console.log('  Normal:', normal);
-      console.log('  Bronquite:', bronchitis);
-      console.log('  Pneumonia:', pneumonia);
-      console.log('  Soma:', normal + bronchitis + pneumonia);
-      
       const maxProb = Math.max(normal, bronchitis, pneumonia);
-      console.log('📊 Probabilidade máxima:', maxProb);
       
       // Determina a classe prevista
       let predictedClass: 'normal' | 'bronchitis' | 'pneumonia' = 'normal';
       if (bronchitis > normal && bronchitis > pneumonia) {
         predictedClass = 'bronchitis';
-        console.log('✅ Classe prevista: BRONQUITE');
       } else if (pneumonia > normal && pneumonia > bronchitis) {
         predictedClass = 'pneumonia';
-        console.log('✅ Classe prevista: PNEUMONIA');
-      } else {
-        console.log('✅ Classe prevista: NORMAL');
       }
 
       // Limpa tensores
-      features.dispose();
       input.dispose();
       prediction.dispose();
+      
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`✅ Análise concluída em ${elapsed}s - Classe: ${predictedClass} (${(maxProb * 100).toFixed(1)}%)`);
 
       const result: DiagnosisResult = {
         normal: normal,
