@@ -95,7 +95,11 @@ export default function HomeScreen() {
     try {
       const diagnosis = await mlService.analyzeCoughFromUri(recording.uri);
       const audioUrl = await supabaseService.uploadAudio(recording.uri, user.id);
-      await supabaseService.saveAnalysis(user.id, audioUrl, diagnosis);
+      console.log('📁 Áudio enviado com sucesso:', audioUrl);
+      
+      // Salva análise no banco de dados
+      const savedAnalysis = await supabaseService.saveAnalysis(user.id, audioUrl, diagnosis);
+      console.log('💾 Análise salva com sucesso:', savedAnalysis.id);
 
       router.push({
         pathname: '/results',
@@ -116,33 +120,27 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#667eea', '#764ba2']}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
+        <Animated.View
+          style={[
+            styles.header,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
-          <Animated.View
-            style={[
-              styles.header,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <Text style={styles.welcomeText}>Olá! 👋</Text>
-        <Text style={styles.emailText}>{user?.email}</Text>
-          </Animated.View>
+          <Text style={styles.welcomeText}>Olá! 👋</Text>
+          <Text style={styles.emailText}>{user?.email}</Text>
+        </Animated.View>
 
           <AnimatedCard delay={100}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>🎤 Análise de Tosse</Text>
+              <Text style={styles.cardTitle}>Análise de Tosse</Text>
               {modelLoaded && (
                 <View style={styles.statusBadge}>
                   <View style={styles.statusDot} />
@@ -158,14 +156,14 @@ export default function HomeScreen() {
 
         {!modelLoaded && (
           <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color="#667eea" />
+                <ActivityIndicator size="small" color="#1a1a1a" />
             <Text style={styles.loadingText}>Carregando modelo...</Text>
           </View>
         )}
 
         {isAnalyzing ? (
           <View style={styles.analyzingContainer}>
-                <ActivityIndicator size="large" color="#667eea" />
+                <ActivityIndicator size="large" color="#1a1a1a" />
             <Text style={styles.analyzingText}>
               Analisando gravação...
             </Text>
@@ -186,7 +184,7 @@ export default function HomeScreen() {
           {/* Estatísticas Rápidas */}
           {userStats && userStats.totalAnalyses > 0 && (
             <AnimatedCard delay={200} style={styles.statsCard}>
-              <Text style={styles.statsTitle}>📈 Suas Estatísticas</Text>
+              <Text style={styles.statsTitle}>Suas Estatísticas</Text>
               <View style={styles.statsGrid}>
                 <View style={styles.statItem}>
                   <Text style={styles.statValue}>{userStats.totalAnalyses}</Text>
@@ -208,7 +206,7 @@ export default function HomeScreen() {
 
           {/* Cards Informativos */}
           <AnimatedCard delay={250} style={styles.infoCard}>
-            <Text style={styles.infoTitle}>💡 Dicas para Melhor Análise</Text>
+            <Text style={styles.infoTitle}>Dicas para Melhor Análise</Text>
             <Text style={styles.infoText}>
               • Grave em ambiente silencioso{'\n'}
               • Tussa naturalmente, sem forçar{'\n'}
@@ -225,8 +223,7 @@ export default function HomeScreen() {
           avaliação adequada.
         </Text>
           </AnimatedCard>
-    </ScrollView>
-      </LinearGradient>
+      </ScrollView>
       <BottomTabNavigator />
       {isAdmin && (
         <View style={styles.adminFloating}>
@@ -244,9 +241,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  gradient: {
-    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -262,15 +257,12 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1a1a1a',
     marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
   emailText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#666',
     fontWeight: '500',
   },
   cardHeader: {
@@ -354,14 +346,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   statsCard: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#F5F5F5',
     borderLeftWidth: 4,
-    borderLeftColor: '#2196F3',
+    borderLeftColor: '#1a1a1a',
   },
   statsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1976D2',
+    color: '#1a1a1a',
     marginBottom: 16,
   },
   statsGrid: {
@@ -374,7 +366,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1976D2',
+    color: '#1a1a1a',
     marginBottom: 4,
   },
   statLabel: {
@@ -383,14 +375,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   infoCard: {
-    backgroundColor: '#F3E5F5',
+    backgroundColor: '#F5F5F5',
     borderLeftWidth: 4,
-    borderLeftColor: '#9C27B0',
+    borderLeftColor: '#1a1a1a',
   },
   infoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#7B1FA2',
+    color: '#1a1a1a',
     marginBottom: 12,
   },
   infoText: {
@@ -404,7 +396,7 @@ const styles = StyleSheet.create({
     bottom: 110,
   },
   adminFloatingInner: {
-    backgroundColor: 'rgba(255, 193, 7, 0.95)',
+    backgroundColor: '#1a1a1a',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 999,
@@ -416,6 +408,6 @@ const styles = StyleSheet.create({
   },
   adminFloatingText: {
     fontWeight: '800',
-    color: '#2c2c2c',
+    color: '#FFFFFF',
   },
 });

@@ -1,13 +1,12 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { AnimatedCard } from '../components/AnimatedCard';
 import { BottomTabNavigator } from '../components/BottomTabNavigator';
 
 export default function AboutScreen() {
   return (
-    <LinearGradient colors={['#667eea', '#764ba2']} style={styles.container}>
+    <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>ℹ️ Sobre</Text>
+        <Text style={styles.title}>Sobre</Text>
 
         <AnimatedCard delay={0}>
           <Text style={styles.cardTitle}>O que este app faz</Text>
@@ -35,12 +34,15 @@ export default function AboutScreen() {
         </AnimatedCard>
       </ScrollView>
       <BottomTabNavigator />
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { 
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   content: {
     padding: 20,
     paddingTop: 60,
@@ -49,11 +51,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1a1a1a',
     marginBottom: 24,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
   cardTitle: {
     fontSize: 18,

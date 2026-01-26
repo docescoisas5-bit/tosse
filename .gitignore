@@ -60,3 +60,6 @@ logs
 *.tmp
 *.temp
 
+# Relatório Técnico (Privado)
+RELATORIO_TECNICO.md
+

@@ -1,15 +1,17 @@
 {
   "expo": {
     "name": "Cough Analysis",
-    "slug": "cough-analysis-app",
-    "version": "1.0.0",
+    "slug": "tosse2",
+    "version": "1.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/images/iconeandroid.png",
     "assetBundlePatterns": [
       "**/*",
       "!assets/images/respiratory_background.png",
-      "!assets/images/respiratory-background.png"
+      "!assets/images/respiratory-background.png",
+      "!assets/images/respiratory*.png",
+      "!assets/images/respiratorybg.png"
     ],
     "ios": {
       "supportsTablet": true,
@@ -39,16 +41,19 @@
         {
           "microphonePermission": "Permitir acesso ao microfone para gravar sons de tosse."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-router"
     ],
     "scheme": "coughanalysis",
     "extra": {
       "modelUrl": "https://gorslmmmivhbjrczsoie.supabase.co/storage/v1/object/public/ml-models/cough-model/model.json",
       "supabaseUrl": "https://gorslmmmivhbjrczsoie.supabase.co",
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvcnNsbW1taXZoYmpyY3pzb2llIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1OTg0MDcsImV4cCI6MjA4MzE3NDQwN30.3F2KZdTKsRkPcQHAj1Z3e2PCUUe8vD5uMWjEOLvAzs0",
       "eas": {
-        "projectId": "942daa14-bc02-4f54-9a7b-354ccfdbdb2e"
+        "projectId": "6cf072d8-0417-4e07-a5b8-db848e791e74"
       }
     },
-    "owner": "themaura"
+    "owner": "themaura10"
   }
 }

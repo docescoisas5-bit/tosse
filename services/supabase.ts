@@ -64,54 +64,38 @@ export class SupabaseService {
     try {
       console.log('📤 Iniciando upload de áudio:', audioUri);
       
-      let fileData: Blob | Uint8Array;
+      // Obtém a extensão correta
+      const extension = audioUri.split('.').pop() || 'wav';
       
-      // Verifica se é um arquivo local (file://) ou URL web
-      if (audioUri.startsWith('file://')) {
-        // Para arquivos locais, usa expo-file-system
-        console.log('📁 Lendo arquivo local...');
-        
-        // Lê o arquivo como base64
-        const base64 = await FileSystem.readAsStringAsync(audioUri, {
-          encoding: 'base64' as any,
-        });
-        
-        // Converte base64 para Uint8Array
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        
-        fileData = bytes;
-        console.log('✅ Arquivo lido, tamanho:', bytes.length, 'bytes');
-      } else {
-        // Para URLs web, usa fetch
-        console.log('🌐 Lendo arquivo de URL...');
-      const response = await fetch(audioUri);
-        if (!response.ok) {
-          throw new Error(`Erro ao buscar áudio: ${response.status}`);
-        }
-      const blob = await response.blob();
-        fileData = blob;
-        console.log('✅ Arquivo baixado, tamanho:', blob.size, 'bytes');
-      }
-      
-      // Gera nome único para o arquivo
+      // Gera nome único para o arquivo mantendo a extensão original
       const timestamp = Date.now();
-      const fileName = `${userId}/${timestamp}.m4a`;
+      const fileName = `${userId}/${timestamp}.${extension}`;
       console.log('📝 Nome do arquivo:', fileName);
       
-      // Determina o content type baseado na extensão
-      const contentType = audioUri.endsWith('.m4a') 
-        ? 'audio/m4a' 
-        : audioUri.endsWith('.wav')
-        ? 'audio/wav'
-        : audioUri.endsWith('.mp3')
-        ? 'audio/mp3'
-        : 'audio/m4a'; // padrão
+      let fileData: Uint8Array;
       
-      console.log('📤 Fazendo upload para Supabase...');
+      // No React Native, ler como base64 e converter para Uint8Array é o mais seguro para o Supabase Storage
+      console.log('📁 Lendo arquivo para Uint8Array...');
+      const base64 = await FileSystem.readAsStringAsync(audioUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      // Converte base64 para Uint8Array
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      fileData = bytes;
+      console.log('✅ Dados lidos, tamanho:', fileData.length, 'bytes');
+      
+      // Determina o content type
+      const contentType = audioUri.endsWith('.wav') ? 'audio/wav' : 
+                          audioUri.endsWith('.mp3') ? 'audio/mpeg' : 
+                          audioUri.endsWith('.m4a') ? 'audio/mp4' : 
+                          'audio/mpeg';
+      
+      console.log('📤 Fazendo upload para Supabase (Content-Type:', contentType, ')...');
       
       // Faz upload
       const { data, error } = await supabase.storage
@@ -159,6 +143,16 @@ export class SupabaseService {
     diagnosis: DiagnosisResult
   ): Promise<Analysis> {
     try {
+      console.log('💾 Salvando análise para usuário:', userId);
+      console.log('📁 URL do áudio:', audioUrl);
+      console.log('📊 Diagnóstico:', {
+        normal: diagnosis.normal,
+        bronchitis: diagnosis.bronchitis,
+        pneumonia: diagnosis.pneumonia,
+        confidence: diagnosis.confidence,
+        predictedClass: diagnosis.predictedClass
+      });
+      
       const { data, error } = await supabase
         .from('analyses')
         .insert({
@@ -177,9 +171,11 @@ export class SupabaseService {
         .single();
 
       if (error) {
+        console.error('❌ Erro ao salvar análise:', error);
         throw error;
       }
 
+      console.log('✅ Análise salva com sucesso, ID:', data?.id);
       return data as Analysis;
     } catch (error) {
       console.error('Erro ao salvar análise:', error);
@@ -199,9 +195,11 @@ export class SupabaseService {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Erro ao obter análises:', error);
         throw error;
       }
 
+      console.log('📊 Total de análises do usuário encontradas:', data?.length || 0);
       return (data || []) as Analysis[];
     } catch (error) {
       console.error('Erro ao obter análises:', error);
@@ -282,49 +280,34 @@ export class SupabaseService {
     try {
       console.log('📤 Iniciando upload de foto de perfil:', photoUri);
       
-      let fileData: Blob | Uint8Array;
-      
-      // Verifica se é um arquivo local (file://) ou URL web
-      if (photoUri.startsWith('file://')) {
-        // Para arquivos locais, usa expo-file-system
-        console.log('📁 Lendo arquivo local...');
-        
-        // Lê o arquivo como base64
-        const base64 = await FileSystem.readAsStringAsync(photoUri, {
-          encoding: 'base64' as any,
-        });
-        
-        // Converte base64 para Uint8Array
-        const binaryString = atob(base64);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        
-        fileData = bytes;
-        console.log('✅ Arquivo lido, tamanho:', bytes.length, 'bytes');
-      } else {
-        // Para URLs web, usa fetch
-        console.log('🌐 Lendo arquivo de URL...');
-        const response = await fetch(photoUri);
-        if (!response.ok) {
-          throw new Error(`Erro ao buscar foto: ${response.status}`);
-        }
-        const blob = await response.blob();
-        fileData = blob;
-        console.log('✅ Arquivo baixado, tamanho:', blob.size, 'bytes');
-      }
-      
-      // Gera nome único para o arquivo
+      // Obtém a extensão correta
+      const extension = photoUri.split('.').pop() || 'jpg';
       const timestamp = Date.now();
-      const fileName = `profile-photos/${userId}/${timestamp}.jpg`;
+      const fileName = `profile-photos/${userId}/${timestamp}.${extension}`;
       console.log('📝 Nome do arquivo:', fileName);
+      
+      // Lê como base64 e converte para Uint8Array (mais seguro para React Native)
+      console.log('📁 Lendo foto para Uint8Array...');
+      const base64 = await FileSystem.readAsStringAsync(photoUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const fileData = bytes;
+      console.log('✅ Dados lidos, tamanho:', fileData.length, 'bytes');
+      
+      // Determina o content type
+      const contentType = photoUri.endsWith('.png') ? 'image/png' : 'image/jpeg';
       
       // Faz upload
       const { data, error } = await supabase.storage
-        .from('cough-recordings') // Usa o mesmo bucket ou cria um específico
+        .from('cough-recordings')
         .upload(fileName, fileData, {
-          contentType: 'image/jpeg',
+          contentType: contentType,
           upsert: false,
         });
 

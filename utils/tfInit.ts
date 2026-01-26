@@ -8,76 +8,11 @@ import * as tf from '@tensorflow/tfjs';
  */
 export async function initTensorFlow(): Promise<void> {
   try {
-    // Configura o TensorFlow.js para usar nosso polyfill ANTES de tf.ready()
-    // Isso é crítico porque o TensorFlow.js pode cachear referências durante a inicialização
-    try {
-      // Tenta configurar ANTES de tf.ready()
-      const tfEnv = (tf as any).env();
-      if (tfEnv) {
-        // Garante que platform existe
-        if (!tfEnv.platform) {
-          tfEnv.platform = {};
-        }
-        
-        // Configura isTypedArray
-        tfEnv.platform.isTypedArray = (value: any): boolean => {
-          if (!value || typeof value !== 'object') {
-            return false;
-          }
-          return (
-            value instanceof Int8Array ||
-            value instanceof Uint8Array ||
-            value instanceof Uint8ClampedArray ||
-            value instanceof Int16Array ||
-            value instanceof Uint16Array ||
-            value instanceof Int32Array ||
-            value instanceof Uint32Array ||
-            value instanceof Float32Array ||
-            value instanceof Float64Array ||
-            value instanceof BigInt64Array ||
-            value instanceof BigUint64Array
-          );
-        };
-        console.log('✅ TensorFlow.js env().platform.isTypedArray configurado ANTES de tf.ready()');
-      } else {
-        console.warn('⚠️ tf.env() não está disponível antes de tf.ready()');
-      }
-    } catch (envError) {
-      console.warn('⚠️ Não foi possível configurar env().platform.isTypedArray antes de tf.ready():', envError);
-    }
+    // Aplica o polyfill antes de tudo
+    const { applyTfjsPolyfill } = await import('../polyfills/tfjs-polyfill');
+    applyTfjsPolyfill();
     
-    // Aguarda TensorFlow estar pronto
-    await tf.ready();
-    
-    // Configura novamente DEPOIS de tf.ready() para garantir
-    try {
-      const tfEnv = (tf as any).env();
-      if (tfEnv && tfEnv.platform) {
-        tfEnv.platform.isTypedArray = (value: any): boolean => {
-          if (!value || typeof value !== 'object') {
-            return false;
-          }
-          return (
-            value instanceof Int8Array ||
-            value instanceof Uint8Array ||
-            value instanceof Uint8ClampedArray ||
-            value instanceof Int16Array ||
-            value instanceof Uint16Array ||
-            value instanceof Int32Array ||
-            value instanceof Uint32Array ||
-            value instanceof Float32Array ||
-            value instanceof Float64Array ||
-            value instanceof BigInt64Array ||
-            value instanceof BigUint64Array
-          );
-        };
-        console.log('✅ TensorFlow.js env().platform.isTypedArray configurado DEPOIS de tf.ready()');
-      }
-    } catch (envError) {
-      console.warn('⚠️ Não foi possível configurar env().platform.isTypedArray depois de tf.ready():', envError);
-    }
-    
-    // Verifica se já há um backend configurado
+    // Verifica se o backend está disponível
     let backend = tf.getBackend();
     
     // Se não houver backend, tenta configurar CPU
@@ -97,7 +32,6 @@ export async function initTensorFlow(): Promise<void> {
     console.log('📊 Backend:', backend || 'automático');
     
     // Verifica se o backend está funcionando criando um tensor de teste
-    // Usa uma abordagem mais simples para evitar problemas com isTypedArray
     try {
       // Cria um array JavaScript simples
       const testArray = [1, 2, 3];

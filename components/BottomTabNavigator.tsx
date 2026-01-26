@@ -2,20 +2,21 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 interface TabItem {
   name: string;
   label: string;
-  icon: string;
+  iconName: keyof typeof Ionicons.glyphMap;
   route: string;
 }
 
 const tabs: TabItem[] = [
-  { name: 'home', label: 'Início', icon: '🏠', route: '/home' },
-  { name: 'history', label: 'Histórico', icon: '📋', route: '/history' },
-  { name: 'tutorial', label: 'Ajuda', icon: '❓', route: '/tutorial' },
-  { name: 'about', label: 'Sobre', icon: 'ℹ️', route: '/about' },
-  { name: 'profile', label: 'Perfil', icon: '👤', route: '/profile' },
+  { name: 'home', label: 'Início', iconName: 'home', route: '/home' },
+  { name: 'history', label: 'Histórico', iconName: 'time', route: '/history' },
+  { name: 'tutorial', label: 'Ajuda', iconName: 'help-circle', route: '/tutorial' },
+  { name: 'about', label: 'Sobre', iconName: 'information-circle', route: '/about' },
+  { name: 'profile', label: 'Perfil', iconName: 'person', route: '/profile' },
 ];
 
 export function BottomTabNavigator() {
@@ -101,9 +102,11 @@ function TabButton({ tab, active, onPress, index }: TabButtonProps) {
             active && styles.iconContainerActive,
           ]}
         >
-          <Text style={[styles.icon, active && styles.iconActive]}>
-            {tab.icon}
-          </Text>
+          <Ionicons
+            name={tab.iconName}
+            size={24}
+            color={active ? '#FFFFFF' : '#666'}
+          />
         </View>
         <Text style={[styles.label, active && styles.labelActive]}>
           {tab.label}
@@ -161,8 +164,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   iconContainerActive: {
-    backgroundColor: '#667eea',
-    shadowColor: '#667eea',
+    backgroundColor: '#1a1a1a',
+    shadowColor: '#1a1a1a',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -171,19 +174,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  icon: {
-    fontSize: 24,
-  },
-  iconActive: {
-    fontSize: 26,
-  },
   label: {
     fontSize: 11,
     color: '#666',
     fontWeight: '500',
   },
   labelActive: {
-    color: '#667eea',
+    color: '#1a1a1a',
     fontWeight: '700',
   },
   indicator: {
@@ -193,7 +190,7 @@ const styles = StyleSheet.create({
     marginLeft: -15,
     width: 30,
     height: 3,
-    backgroundColor: '#667eea',
+    backgroundColor: '#1a1a1a',
     borderRadius: 2,
   },
 });

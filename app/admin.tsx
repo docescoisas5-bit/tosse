@@ -15,7 +15,6 @@ import {
   Platform,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useAuth } from '../contexts/AuthContext';
 import { adminService } from '../services/adminService';
@@ -74,6 +73,7 @@ export default function AdminScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Carregando dados para aba:', activeTab);
 
       if (activeTab === 'stats') {
         const statsData = await adminService.getStats();
@@ -83,9 +83,11 @@ export default function AdminScreen() {
         setUsers(usersData);
       } else if (activeTab === 'analyses') {
         const analysesData = await adminService.getAllAnalyses();
+        console.log('✅ Análises carregadas:', analysesData.length);
         setAnalyses(analysesData);
       } else if (activeTab === 'audios') {
         const audiosData = await adminService.listAllAudios();
+        console.log('✅ Áudios carregados:', audiosData.length);
         setAudios(audiosData);
       }
     } catch (error: any) {
@@ -244,7 +246,7 @@ export default function AdminScreen() {
   if (!isAdmin) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#667eea" />
+        <ActivityIndicator size="large" color="#1a1a1a" />
         <Text style={styles.loadingText}>Verificando permissões...</Text>
       </View>
     );
@@ -252,53 +254,47 @@ export default function AdminScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#667eea', '#764ba2']}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          showsVerticalScrollIndicator={false}
+        <Animated.View
+          style={[
+            styles.header,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
         >
-          <Animated.View
-            style={[
-              styles.header,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <Text style={styles.title}>⚙️ Painel Administrativo</Text>
-            <Text style={styles.subtitle}>{user?.email}</Text>
-          </Animated.View>
+          <Text style={styles.title}>Painel Administrativo</Text>
+          <Text style={styles.subtitle}>{user?.email}</Text>
+        </Animated.View>
 
           {/* Tabs */}
           <View style={styles.tabs}>
             <AnimatedButton
-              title="📊 Stats"
+              title="Stats"
               onPress={() => setActiveTab('stats')}
               variant={activeTab === 'stats' ? 'primary' : 'secondary'}
               style={[styles.tabButton, activeTab === 'stats' && styles.tabButtonActive]}
             />
             <AnimatedButton
-              title="👥 Users"
+              title="Users"
               onPress={() => setActiveTab('users')}
               variant={activeTab === 'users' ? 'primary' : 'secondary'}
               style={[styles.tabButton, activeTab === 'users' && styles.tabButtonActive]}
             />
             <AnimatedButton
-              title="📋 Analyses"
+              title="Analyses"
               onPress={() => setActiveTab('analyses')}
               variant={activeTab === 'analyses' ? 'primary' : 'secondary'}
               style={[styles.tabButton, activeTab === 'analyses' && styles.tabButtonActive]}
             />
             <AnimatedButton
-              title="🎵 Audios"
+              title="Audios"
               onPress={() => setActiveTab('audios')}
               variant={activeTab === 'audios' ? 'primary' : 'secondary'}
               style={[styles.tabButton, activeTab === 'audios' && styles.tabButtonActive]}
@@ -308,7 +304,7 @@ export default function AdminScreen() {
           {/* Content */}
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#667eea" />
+              <ActivityIndicator size="large" color="#1a1a1a" />
               <Text style={styles.loadingText}>Carregando...</Text>
             </View>
           ) : (
@@ -317,35 +313,30 @@ export default function AdminScreen() {
                 <View style={styles.statsContainer}>
                   <AnimatedCard delay={0}>
                     <View style={styles.statCard}>
-                      <Text style={styles.statIcon}>👥</Text>
                       <Text style={styles.statValue}>{stats.total_users}</Text>
                       <Text style={styles.statLabel}>Total de Usuários</Text>
                     </View>
                   </AnimatedCard>
                   <AnimatedCard delay={100}>
                     <View style={styles.statCard}>
-                      <Text style={styles.statIcon}>📊</Text>
                       <Text style={styles.statValue}>{stats.total_analyses}</Text>
                       <Text style={styles.statLabel}>Total de Análises</Text>
                     </View>
                   </AnimatedCard>
                   <AnimatedCard delay={200}>
                     <View style={styles.statCard}>
-                      <Text style={styles.statIcon}>👑</Text>
                       <Text style={styles.statValue}>{stats.total_admins}</Text>
                       <Text style={styles.statLabel}>Administradores</Text>
                     </View>
                   </AnimatedCard>
                   <AnimatedCard delay={300}>
                     <View style={styles.statCard}>
-                      <Text style={styles.statIcon}>✅</Text>
                       <Text style={styles.statValue}>{stats.users_with_analyses}</Text>
                       <Text style={styles.statLabel}>Usuários com Análises</Text>
                     </View>
                   </AnimatedCard>
                   <AnimatedCard delay={400}>
                     <View style={styles.statCard}>
-                      <Text style={styles.statIcon}>🎯</Text>
                       <Text style={styles.statValue}>
                         {(stats.avg_confidence * 100).toFixed(1)}%
                       </Text>
@@ -358,7 +349,7 @@ export default function AdminScreen() {
               {activeTab === 'users' && (
                 <View style={styles.listContainer}>
                   <AnimatedButton
-                    title="➕ Criar Novo Usuário"
+                    title="Criar Novo Usuário"
                     onPress={() => setShowCreateUser(true)}
                     variant="success"
                     style={styles.createButton}
@@ -373,7 +364,7 @@ export default function AdminScreen() {
                             <View style={styles.userMeta}>
                               <View style={[styles.roleBadge, userProfile.role === 'admin' && styles.roleBadgeAdmin]}>
                                 <Text style={styles.roleBadgeText}>
-                                  {userProfile.role === 'admin' ? '👑 Admin' : '👤 User'}
+                                  {userProfile.role === 'admin' ? 'Admin' : 'User'}
                                 </Text>
                               </View>
                               <Text style={styles.userDate}>
@@ -402,7 +393,7 @@ export default function AdminScreen() {
                             style={styles.actionButtonSmall}
                           />
                           <AnimatedButton
-                            title="🗑️ Deletar"
+                            title="Deletar"
                             onPress={() => handleDeleteUser(userProfile.id, userProfile.email)}
                             variant="danger"
                             style={styles.actionButtonSmall}
@@ -444,7 +435,7 @@ export default function AdminScreen() {
                             {new Date(analysis.created_at).toLocaleString('pt-BR')}
                           </Text>
                           <AnimatedButton
-                            title="🗑️ Deletar"
+                            title="Deletar"
                             onPress={() => handleDeleteAnalysis(analysis.id)}
                             variant="danger"
                             style={styles.deleteButton}
@@ -465,20 +456,20 @@ export default function AdminScreen() {
                           {audio.path}
                         </Text>
                         <Text style={styles.audioMeta}>
-                          📦 {(audio.size / 1024).toFixed(2)} KB | 📅{' '}
+                          {(audio.size / 1024).toFixed(2)} KB | {' '}
                           {audio.created_at
                             ? new Date(audio.created_at).toLocaleString('pt-BR')
                             : 'Data não disponível'}
                         </Text>
                         <View style={styles.audioActions}>
                           <AnimatedButton
-                            title="🎵 Ouvir"
+                            title="Ouvir"
                             onPress={() => handlePlayAudio(audio.path)}
                             variant="success"
                             style={styles.audioButton}
                           />
                           <AnimatedButton
-                            title="📋 Copiar URL"
+                            title="Copiar URL"
                             onPress={async () => {
                               try {
                                 const audioUrl = await adminService.getAudioUrl(audio.path);
@@ -502,13 +493,13 @@ export default function AdminScreen() {
           {/* Footer */}
           <View style={styles.footer}>
             <AnimatedButton
-              title="🏠 Voltar para Home"
+              title="Voltar para Home"
               onPress={() => router.push('/home')}
               variant="secondary"
               style={styles.footerButton}
             />
             <AnimatedButton
-              title="🚪 Sair"
+              title="Sair"
               onPress={signOut}
               variant="danger"
               style={styles.footerButton}
@@ -525,7 +516,7 @@ export default function AdminScreen() {
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>➕ Criar Novo Usuário</Text>
+              <Text style={styles.modalTitle}>Criar Novo Usuário</Text>
               
               <TextInput
                 style={styles.input}
@@ -555,7 +546,7 @@ export default function AdminScreen() {
                   onPress={() => setNewUserRole('user')}
                 >
                   <Text style={[styles.roleOptionText, newUserRole === 'user' && styles.roleOptionTextActive]}>
-                    👤 Usuário
+                    Usuário
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -566,7 +557,7 @@ export default function AdminScreen() {
                   onPress={() => setNewUserRole('admin')}
                 >
                   <Text style={[styles.roleOptionText, newUserRole === 'admin' && styles.roleOptionTextActive]}>
-                    👑 Admin
+                    Admin
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -595,7 +586,6 @@ export default function AdminScreen() {
             </View>
           </View>
         </Modal>
-      </LinearGradient>
     </View>
   );
 }
@@ -603,9 +593,7 @@ export default function AdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  gradient: {
-    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   scrollView: {
     flex: 1,
@@ -620,15 +608,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#1a1a1a',
     marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: '#666',
     fontWeight: '500',
   },
   tabs: {
@@ -650,7 +635,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
-    color: '#fff',
+    color: '#666',
     fontSize: 16,
   },
   contentArea: {
@@ -663,14 +648,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  statIcon: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
   statValue: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#667eea',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   statLabel: {
@@ -714,7 +695,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   roleBadgeAdmin: {
-    backgroundColor: '#FFE5E5',
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#1a1a1a',
   },
   roleBadgeText: {
     fontSize: 12,
@@ -750,7 +733,7 @@ const styles = StyleSheet.create({
   },
   analysisConfidence: {
     fontSize: 14,
-    color: '#667eea',
+    color: '#1a1a1a',
     fontWeight: '600',
   },
   analysisDetails: {
@@ -846,8 +829,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
   },
   roleOptionActive: {
-    borderColor: '#667eea',
-    backgroundColor: '#E7F3FF',
+    borderColor: '#1a1a1a',
+    backgroundColor: '#F5F5F5',
   },
   roleOptionText: {
     fontSize: 16,
@@ -855,7 +838,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   roleOptionTextActive: {
-    color: '#667eea',
+    color: '#1a1a1a',
   },
   modalActions: {
     flexDirection: 'row',

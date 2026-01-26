@@ -96,9 +96,11 @@ export class AdminService {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Erro ao obter análises:', error);
         throw error;
       }
 
+      console.log('📊 Total de análises encontradas:', data?.length || 0);
       return (data || []) as Analysis[];
     } catch (error) {
       console.error('Erro ao obter análises:', error);
@@ -432,27 +434,21 @@ export class AdminService {
         throw new Error('Acesso negado: apenas administradores podem listar áudios');
       }
 
-      const { data, error } = await supabase.storage
-        .from('cough-recordings')
-        .list('', {
-          limit: 1000,
-          sortBy: { column: 'created_at', order: 'desc' },
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      // Lista recursivamente todas as pastas
+      // Lista recursivamente todas as pastas e arquivos
       const allFiles: Array<{ path: string; size: number; created_at: string }> = [];
       
       const listRecursive = async (folder: string = '') => {
-        const { data: folderData } = await supabase.storage
+        const { data: folderData, error: folderError } = await supabase.storage
           .from('cough-recordings')
           .list(folder, {
             limit: 1000,
             sortBy: { column: 'created_at', order: 'desc' },
           });
+
+        if (folderError) {
+          console.error('Erro ao listar pasta:', folder, folderError);
+          return; // Continua com outras pastas em vez de lançar erro
+        }
 
         if (folderData) {
           for (const item of folderData) {
@@ -460,18 +456,23 @@ export class AdminService {
               // É uma pasta, lista recursivamente
               await listRecursive(folder ? `${folder}/${item.name}` : item.name);
             } else {
-              // É um arquivo
-              allFiles.push({
-                path: folder ? `${folder}/${item.name}` : item.name,
-                size: item.metadata?.size || 0,
-                created_at: item.created_at || '',
-              });
+              // É um arquivo - verifica se é um arquivo de áudio
+              if (item.name.toLowerCase().endsWith('.m4a') || 
+                  item.name.toLowerCase().endsWith('.mp3') || 
+                  item.name.toLowerCase().endsWith('.wav')) {
+                allFiles.push({
+                  path: folder ? `${folder}/${item.name}` : item.name,
+                  size: item.metadata?.size || 0,
+                  created_at: item.created_at || '',
+                });
+              }
             }
           }
         }
       };
 
       await listRecursive();
+      console.log('📁 Total de arquivos de áudio encontrados:', allFiles.length);
       return allFiles;
     } catch (error) {
       console.error('Erro ao listar áudios:', error);

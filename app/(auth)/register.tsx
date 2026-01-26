@@ -58,11 +58,7 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ImageBackground
-        source={require('../../assets/images/respiratory_background.png')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      >
+      <View style={styles.container}>
         {/* Overlay escuro para melhorar legibilidade */}
         <View style={styles.overlay} />
         
@@ -130,7 +126,7 @@ export default function RegisterScreen() {
             </View>
           </View>
         </LinearGradient>
-      </ImageBackground>
+      </View>
     </KeyboardAvoidingView>
   );
 }

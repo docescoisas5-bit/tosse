@@ -29,7 +29,9 @@ export default function HistoryScreen() {
     if (!user) return;
 
     try {
+      console.log('🔄 Carregando análises do usuário:', user.id);
       const data = await supabaseService.getAnalyses(user.id);
+      console.log('✅ Análises carregadas:', data.length);
       setAnalyses(data);
     } catch (error: any) {
       console.error('Erro ao carregar análises:', error);
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFFFFF',
   },
   content: {
     padding: 16,
@@ -222,7 +224,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFFFFF',
   },
   loadingText: {
     marginTop: 16,
@@ -230,21 +232,23 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    color: '#1a1a1a',
+    marginBottom: 20,
   },
   analysisCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
   },
   analysisHeader: {
     flexDirection: 'row',

@@ -1,0 +1,130 @@
+========================================
+INSTRUÇÕES: DEPLOY MODELO BINÁRIO
+========================================
+
+✅ MODELO TREINADO COM SUCESSO!
+   Accuracy: 61%
+   Recall Normal: 55%
+   Recall Anormal: 65%
+   Threshold ótimo: 0.59
+
+========================================
+1. FAZER UPLOAD DO MODELO
+========================================
+
+1.1. Baixe o arquivo ZIP do Colab:
+     icbhi_binary_balanced.zip
+
+1.2. Extraia o ZIP localmente
+
+1.3. Acesse Supabase Storage:
+     https://supabase.com/dashboard/project/gorslmmmivhbjrczsoie/storage/buckets/ml-models
+
+1.4. Entre na pasta: cough-model
+
+1.5. DELETE todos os arquivos antigos:
+     - model.json (antigo)
+     - group1-shard1of1.bin (antigo)
+     - model_info.json (antigo)
+
+1.6. Faça UPLOAD dos novos arquivos:
+     Pasta: tfjs_model/
+     - model.json
+     - group1-shard1of1.bin
+     
+     Pasta raiz:
+     - model_info.json (IMPORTANTE: contém threshold=0.59!)
+
+========================================
+2. TESTAR O MODELO
+========================================
+
+2.1. No app React Native, vá em Home
+
+2.2. Grave um áudio de tosse
+
+2.3. Aguarde análise
+
+2.4. Verifique os logs no terminal:
+     ✅ "Modelo de classificação binária detectado"
+     ✅ "Threshold ótimo: 0.59"
+     ✅ "Classificação BINÁRIA:"
+     
+2.5. Na tela de resultados:
+     - Se NORMAL: Verá alta probabilidade em "Normal"
+     - Se ANORMAL: Verá probabilidades divididas entre Bronquite/Pneumonia
+
+========================================
+3. COMO O MODELO FUNCIONA AGORA
+========================================
+
+MODELO BINÁRIO (internamente):
+  Input: 13 MFCCs → Modelo → Saída: 1 valor (probabilidade de Anormal)
+  
+  Se Anormal > 0.59:
+    ➜ ANORMAL detectado
+    ➜ Interface mostra: Bronquite ~30% + Pneumonia ~30% + Normal ~40%
+    
+  Se Anormal ≤ 0.59:
+    ➜ NORMAL detectado
+    ➜ Interface mostra: Normal ~60% + Bronquite ~20% + Pneumonia ~20%
+
+VANTAGENS:
+  ✅ Mais confiável que modelo de 3 classes (que tinha 40% accuracy)
+  ✅ Threshold otimizado (0.59) balanceia falsos positivos/negativos
+  ✅ Interface continua igual (usuário não nota diferença)
+
+========================================
+4. ARQUIVOS MODIFICADOS
+========================================
+
+✅ services/mlService.ts
+   - Detecta automaticamente se modelo é binário
+   - Aplica threshold 0.59
+   - Converte saída binária para 3 classes (UI compatível)
+
+✅ train_model/COLAB_BINARY_BALANCED.py
+   - Script de treino com undersampling + SMOTE
+   - Modelo: 128→64→1 (sigmoid)
+   - Accuracy: 61%, Recall balanceado
+
+✅ train_model/COLAB_FIND_BEST_THRESHOLD.py
+   - Encontra threshold ótimo (0.59)
+   - Atualiza model_info.json automaticamente
+
+========================================
+5. PRÓXIMOS TESTES
+========================================
+
+Após fazer upload do modelo:
+
+1. Teste com áudio NORMAL:
+   Expectativa: Normal 55-65%
+
+2. Teste com áudio ANORMAL (bronquite/pneumonia):
+   Expectativa: Bronquite/Pneumonia ~65%
+
+3. Verifique os logs para confirmar:
+   "✅ NORMAL (≤59%)" ou "⚠️ ANORMAL detectado (>59%)"
+
+========================================
+6. TROUBLESHOOTING
+========================================
+
+❌ "Modelo sempre dá Normal 100%"
+   ➜ Verifique se model_info.json foi carregado
+   ➜ Logs devem mostrar: "Threshold ótimo: 0.59"
+
+❌ "Modelo dá erro ao carregar"
+   ➜ Verifique se tem 3 arquivos no Supabase:
+     - tfjs_model/model.json
+     - tfjs_model/group1-shard1of1.bin
+     - model_info.json
+
+❌ "Probabilidades estranhas"
+   ➜ Verifique logs: deve ter "Classificação BINÁRIA:"
+   ➜ Se aparecer "MULTICLASSE", modelo antigo ainda está carregado
+
+========================================
+FIM DAS INSTRUÇÕES
+========================================

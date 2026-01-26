@@ -108,7 +108,33 @@ export function AudioRecorder({ onRecordingComplete, onError }: AudioRecorderPro
       });
 
       const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
+        // Opções customizadas para gravar em formato PCM/WAV que podemos decodificar
+        {
+          isMeteringEnabled: true,
+          android: {
+            extension: '.wav',
+            outputFormat: 0, // DEFAULT
+            audioEncoder: 0, // DEFAULT  
+            sampleRate: 16000,
+            numberOfChannels: 1,
+            bitRate: 256000,
+          },
+          ios: {
+            extension: '.wav',
+            outputFormat: 'lpcm', // Linear PCM
+            audioQuality: 127, // MAX quality
+            sampleRate: 16000,
+            numberOfChannels: 1,
+            bitRate: 256000,
+            linearPCMBitDepth: 16,
+            linearPCMIsBigEndian: false,
+            linearPCMIsFloat: false,
+          },
+          web: {
+            mimeType: 'audio/wav',
+            bitsPerSecond: 256000,
+          },
+        }
       );
 
       setRecording(newRecording);
